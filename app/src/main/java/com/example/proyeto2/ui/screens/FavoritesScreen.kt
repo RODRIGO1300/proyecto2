@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -19,12 +19,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.proyeto2.utils.PdfUtils
 
 @Composable
 fun FavoritesScreen(navController: NavHostController) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,9 +50,39 @@ fun FavoritesScreen(navController: NavHostController) {
             colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text("EXIT", color = Color.Black, fontWeight = FontWeight.Bold)
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(
+            onClick = {
+                PdfUtils.crearYGuardarPdfEnDescargas(
+                    context = context,
+                    nombreArchivo = "Receta_Favorita_Prueba",
+                    titulo = "Receta de Prueba",
+                    subtitulo = "Desde Favoritos",
+                    contenido = """
+                Ingredientes:
+                • 200g de pasta
+                • 100g de queso parmesano
+                • 2 dientes de ajo
+                • Aceite de oliva
+                • Sal y pimienta
+                
+                Preparación:
+                1. Cocina la pasta en agua con sal.
+                2. Sofríe el ajo en aceite.
+                3. Mezcla todo y agrega el queso.
+                
+                ¡Buen provecho!
+            """.trimIndent()
+                )
+            },
+            modifier = Modifier.align(Alignment.BottomStart),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Generar PDF", style = MaterialTheme.typography.labelSmall)
         }
     }
 }

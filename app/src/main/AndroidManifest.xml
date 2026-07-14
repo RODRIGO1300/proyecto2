@@ -24,7 +24,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
                     android:scheme="https"
-                    android:host="proyecto2-e24ec.firebaseapp.com"
+                    android:host="console.firebase.google.com/project/example-c0caf/overview"
                     android:pathPrefix="/__/auth/links" />
             </intent-filter>
 
