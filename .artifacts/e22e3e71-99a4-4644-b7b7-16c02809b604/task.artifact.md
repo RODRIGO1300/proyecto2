@@ -1,0 +1,3 @@
+- [x] Update `PdfUtils.kt` to include `subtitulo`
+- [x] Fix `FavoritesScreen.kt` (Context, parameter mapping, and icons)
+- [x] Verify compilation
