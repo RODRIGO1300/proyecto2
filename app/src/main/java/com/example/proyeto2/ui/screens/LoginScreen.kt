@@ -11,10 +11,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen() {
     var usuario by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
