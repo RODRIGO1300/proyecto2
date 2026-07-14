@@ -6,12 +6,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.proyeto2.navigation.NavGraph
 import com.example.proyeto2.ui.screens.LoginScreen
+import com.example.proyeto2.ui.screens.RegisterScreen
 import com.example.proyeto2.ui.theme.Proyeto2Theme
 
 class MainActivity : ComponentActivity() {
@@ -20,9 +25,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Proyeto2Theme {
-
-                LoginScreen()
-
+                Surface(color= MaterialTheme.colorScheme.background){
+                    val navController = rememberNavController()
+                    NavGraph(navController = navController)
+                }
             }
         }
     }

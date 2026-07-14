@@ -13,10 +13,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.proyeto2.ui.theme.GradientTotal
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navHostController: NavHostController) {
     var usuario by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -75,11 +76,11 @@ fun LoginScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextButton(onClick = {}) {
+                TextButton(onClick = {navHostController.navigate("RegisterScreen")}) {
                     Text("¿No tienes cuenta? Regístrate", fontSize = 16.sp)
                 }
 
-                TextButton(onClick = {}) {
+                TextButton(onClick = {navHostController.popBackStack()}) {
                     Text("Salir")
                 }
             }
