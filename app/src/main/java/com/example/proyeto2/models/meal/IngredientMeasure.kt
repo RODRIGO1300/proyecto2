@@ -1,5 +1,6 @@
 package com.example.proyeto2.models.meal
 
-class IngredientMeasure(
-
+data class IngredientMeasure(
+    val ingredient: String,
+    val measure: String
 )

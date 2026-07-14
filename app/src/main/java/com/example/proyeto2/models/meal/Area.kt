@@ -1,5 +1,8 @@
 package com.example.proyeto2.models.meal
 
-class Area(
+import com.google.gson.annotations.SerializedName
 
+data class Area(
+    @SerializedName("strArea")
+    val name: String? = null
 )

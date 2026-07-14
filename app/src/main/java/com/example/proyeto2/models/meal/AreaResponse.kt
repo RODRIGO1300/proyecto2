@@ -1,5 +1,5 @@
 package com.example.proyeto2.models.meal
 
-class AreaResponse(
-
+data class AreaResponse(
+    val meals: List<Area>? = null
 )

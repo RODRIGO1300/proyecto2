@@ -1,4 +1,4 @@
-package com.example.proyecto2.models.meal
+package com.example.proyeto2.models.meal
 
 import com.google.gson.annotations.SerializedName
 

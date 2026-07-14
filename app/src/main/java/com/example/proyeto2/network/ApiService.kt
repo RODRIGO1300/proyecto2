@@ -1,7 +1,10 @@
 package com.example.proyeto2.network
 
-import com.example.proyecto2.models.meal.MealResponse
+import com.example.proyeto2.models.meal.AreaResponse
+import com.example.proyeto2.models.meal.CategoryListResponse
 import com.example.proyeto2.models.meal.CategoryResponse
+import com.example.proyeto2.models.meal.IngredientResponse
+import com.example.proyeto2.models.meal.MealResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -36,19 +39,19 @@ interface ApiService {
         @GET("list.php")
         suspend fun getCategoryList(
             @Query("c") value: String = "list"
-        ): MealResponse
+        ): CategoryListResponse
 
         // Obtener lista de países o regiones
         @GET("list.php")
         suspend fun getAreaList(
             @Query("a") value: String = "list"
-        ): MealResponse
+        ): AreaResponse
 
         // Obtener lista de ingredientes
         @GET("list.php")
         suspend fun getIngredientList(
             @Query("i") value: String = "list"
-        ): MealResponse
+        ): IngredientResponse
 
         // Filtrar por un ingrediente
         @GET("filter.php")

@@ -1,5 +1,5 @@
 package com.example.proyeto2.models.meal
 
-class CategoryResponse(
-
+data class CategoryResponse(
+    val categories: List<Category>? = null
 )
