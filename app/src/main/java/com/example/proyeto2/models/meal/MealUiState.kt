@@ -2,6 +2,7 @@ package com.example.proyeto2.models.meal
 
 data class MealUiState(
     val isLoading: Boolean = false,
+    val selectedLetter: String = "a",
     val meals: List<Meal> = emptyList(),
     val selectedMeal: Meal? = null,
     val categories: List<Category> = emptyList(),
