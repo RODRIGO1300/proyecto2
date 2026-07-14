@@ -1,6 +1,7 @@
 package com.example.proyeto2.network
 
-import com.example.proyeto2.models.meal.MealResponse
+import com.example.proyecto2.models.meal.MealResponse
+import com.example.proyeto2.models.meal.CategoryResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
