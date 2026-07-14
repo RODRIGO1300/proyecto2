@@ -1,16 +1,9 @@
-package com.example.proyecto2.models.User
+package com.example.proyeto2.models.user
 
-import com.example.proyeto2.models.user.AuthUser
-
-sealed class AuthResult {
-
-    data class Success(
-        val user: AuthUser
-    ) : AuthResult()
-
-    data class Error(
-        val message: String
-    ) : AuthResult()
-
-    data object Cancelled : AuthResult()
-}
+data class AuthUiState(
+    val isLoading: Boolean = false,
+    val user: AuthUser? = null,
+    val errorMessage: String? = null,
+    val isEmailVerificationSent: Boolean = false,
+    val isPasswordResetSent: Boolean = false
+)
