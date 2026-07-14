@@ -88,6 +88,5 @@ fun RegisterScreen(navHostController: NavHostController){
 
             }
         }
-
     }
 }

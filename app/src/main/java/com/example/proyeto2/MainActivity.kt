@@ -1,6 +1,5 @@
 package com.example.proyeto2
 
-/*
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
@@ -30,42 +29,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Proyeto2Theme {
-//                Surface(color= MaterialTheme.colorScheme.background){
-//                    val navController = rememberNavController()
-//                    NavGraph(navController = navController)
-//                }
-                val auth = Firebase.auth
-                val intent = intent
-                val emailLink = intent.data.toString()
-
-// Confirm the link is a sign-in with email link.
-                if (auth.isSignInWithEmailLink(emailLink)) {
-                    // Retrieve this from wherever you stored it
-                    val email = "fixer130404@gmail.com"
-
-                    // The client SDK will parse the code from the link for you.
-                    auth.signInWithEmailLink(email, emailLink)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Log.d(TAG, "Successfully signed in with email link!")
-                                val result = task.result
-                                // You can access the new user via result.getUser()
-                                // Additional user info profile *not* available via:
-                                // result.getAdditionalUserInfo().getProfile() == null
-                                // You can check if the user is new or existing:
-                                // result.getAdditionalUserInfo().isNewUser()
-                            } else {
-                                Log.e(TAG, "Error signing in with email link", task.exception)
-                            }
-                        }
+                Surface(color= MaterialTheme.colorScheme.background){
+                    val navController = rememberNavController()
+                    NavGraph(navController = navController)
                 }
             }
         }
     }
 }
 
-*/
-
+/*
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -242,3 +215,4 @@ class MainActivity : ComponentActivity() {
             }
     }
 }
+ */

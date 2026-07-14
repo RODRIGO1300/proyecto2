@@ -15,7 +15,7 @@ import com.example.proyeto2.ui.screens.RegisterScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "LoginScreen") {
+    NavHost(navController = navController, startDestination = "HomeScreen") {
         composable("LoginScreen") { LoginScreen(navController) }
         composable("RegisterScreen") { RegisterScreen(navController) }
         composable("HomeScreen") { HomeScreen(navController) }
