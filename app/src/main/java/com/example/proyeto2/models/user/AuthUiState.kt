@@ -4,6 +4,9 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val user: AuthUser? = null,
     val errorMessage: String? = null,
+    val successMessage: String? = null,
+    val isAuthenticated: Boolean = false,
+    val isEmailVerified: Boolean = false,
     val isEmailVerificationSent: Boolean = false,
     val isPasswordResetSent: Boolean = false
 )
