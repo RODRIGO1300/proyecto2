@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -46,7 +45,6 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.models.favorite.FavoriteMeal
 import com.example.proyeto2.ui.theme.GradientTotal
-import com.example.proyeto2.utils.PdfUtils
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -57,7 +55,6 @@ fun FavoritesScreen(
     navController: NavHostController,
     favoriteViewModel: FavoriteViewModel = viewModel()
 ) {
-    val context = LocalContext.current
     val uiState = favoriteViewModel.uiState
 
     LaunchedEffect(Unit) {
@@ -98,28 +95,6 @@ fun FavoritesScreen(
             color = Color.White.copy(alpha = 0.86f),
             fontWeight = FontWeight.SemiBold
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                val contenido = uiState.favorites.joinToString("\n\n") {
-                    "${it.nombre}\nCategoria: ${it.categoria}\nPais: ${it.pais}\nNota: ${it.nota.ifBlank { "Sin nota" }}"
-                }.ifBlank { "No hay favoritos guardados." }
-
-                PdfUtils.crearYGuardarPdfEnDescargas(
-                    context = context,
-                    nombreArchivo = "Mis_Recetas_Favoritas",
-                    titulo = "Mis recetas favoritas",
-                    subtitulo = "RecipeBook",
-                    contenido = contenido
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Generar PDF de favoritos", fontWeight = FontWeight.Bold)
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
