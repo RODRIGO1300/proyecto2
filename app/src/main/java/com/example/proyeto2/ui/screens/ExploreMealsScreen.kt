@@ -46,7 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.models.meal.Meal
-import com.example.proyeto2.ui.theme.GradientTotal
+import com.example.proyeto2.ui.theme.GradientClaroOscuro
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
 
@@ -67,7 +67,7 @@ fun ExploreMealsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(GradientTotal)
+            .background(GradientClaroOscuro)
             .safeDrawingPadding()
             .padding(18.dp)
     ) {
@@ -77,11 +77,11 @@ fun ExploreMealsScreen(
         ) {
             OutlinedButton(
                 onClick = { navController.popBackStack() },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                colors = ButtonDefaults.buttonColors(Color.Red)
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Volver")
+                Text("Volver", color = Color.Black)
             }
         }
 

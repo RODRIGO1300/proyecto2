@@ -47,7 +47,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.R
 import com.example.proyeto2.models.meal.Meal
 import com.example.proyeto2.models.meal.ingredientMeasures
-import com.example.proyeto2.ui.theme.GradientTotal
+import com.example.proyeto2.ui.theme.GradientTierra
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
 
@@ -69,17 +69,17 @@ fun MealDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(GradientTotal)
+            .background(GradientTierra)
             .safeDrawingPadding()
             .padding(18.dp)
     ) {
         OutlinedButton(
             onClick = { navController.popBackStack() },
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            colors = ButtonDefaults.buttonColors(Color.Red)
         ) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Volver")
+            Text("Volver", color = Color.Black)
         }
 
         Spacer(modifier = Modifier.height(14.dp))

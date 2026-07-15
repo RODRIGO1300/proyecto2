@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -53,7 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.example.proyeto2.ui.theme.GradientTotal
+import com.example.proyeto2.ui.theme.GradientSofisticado
 import com.example.proyeto2.viewmodel.AuthViewModel
 
 @Composable
@@ -81,16 +82,19 @@ fun ProfileScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GradientTotal)
+                .background(GradientSofisticado)
                 .safeDrawingPadding()
                 .imePadding()
                 .padding(18.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                OutlinedButton(onClick = { navController.popBackStack() }) {
+                OutlinedButton(
+                    onClick = { navController.popBackStack() },
+                    colors = ButtonDefaults.buttonColors(Color.Red))
+                {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Volver")
+                    Text("Volver", color = Color.Black)
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))

@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.example.proyeto2.ui.theme.GradientTotal
+import com.example.proyeto2.ui.theme.GradientOtono
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -56,7 +56,7 @@ fun HomeScreen(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GradientTotal)
+                .background(GradientOtono)
                 .safeDrawingPadding()
                 .padding(24.dp)
         ) {
@@ -118,9 +118,9 @@ fun HomeScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(Color.Red)
                 ) {
-                    Text(text = "Cerrar sesion", fontWeight = FontWeight.Bold)
+                    Text(text = "Cerrar sesion", fontWeight = FontWeight.Bold, color = Color.Black)
                 }
             }
         }

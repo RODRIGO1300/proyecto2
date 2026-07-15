@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.proyeto2.ui.theme.GradientTotal
+import com.example.proyeto2.ui.theme.GradientVital
 import com.example.proyeto2.viewmodel.AuthViewModel
 
 @Composable
@@ -56,7 +56,7 @@ fun RegisterScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GradientTotal)
+                .background(GradientVital)
                 .safeDrawingPadding()
                 .imePadding()
                 .padding(horizontal = 24.dp),

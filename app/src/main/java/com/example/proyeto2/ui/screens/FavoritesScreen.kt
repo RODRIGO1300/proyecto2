@@ -44,7 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.models.favorite.FavoriteMeal
-import com.example.proyeto2.ui.theme.GradientTotal
+import com.example.proyeto2.ui.theme.GradientAurora
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -64,7 +64,7 @@ fun FavoritesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(GradientTotal)
+            .background(GradientAurora)
             .safeDrawingPadding()
             .padding(18.dp)
     ) {
@@ -74,11 +74,11 @@ fun FavoritesScreen(
         ) {
             OutlinedButton(
                 onClick = { navController.popBackStack() },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                colors = ButtonDefaults.buttonColors(Color.Red)
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Volver")
+                Text("Volver", color = Color.Black)
             }
         }
 
