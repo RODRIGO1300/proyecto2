@@ -2,6 +2,7 @@ package com.example.proyeto2.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,15 +47,22 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.models.meal.Meal
 import com.example.proyeto2.ui.theme.GradientTotal
+import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
 
 @Composable
 fun ExploreMealsScreen(
     navController: NavHostController,
-    mealViewModel: MealViewModel = viewModel()
+    mealViewModel: MealViewModel = viewModel(),
+    favoriteViewModel: FavoriteViewModel = viewModel()
 ) {
     val uiState = mealViewModel.uiState
+    val favoriteState = favoriteViewModel.uiState
     val letters = ('A'..'Z').toList()
+
+    LaunchedEffect(Unit) {
+        favoriteViewModel.observeFavorites()
+    }
 
     Column(
         modifier = Modifier
@@ -88,6 +98,12 @@ fun ExploreMealsScreen(
             color = Color.White.copy(alpha = 0.86f),
             fontWeight = FontWeight.SemiBold
         )
+        favoriteState.successMessage?.let {
+            Text(text = it, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+        }
+        favoriteState.errorMessage?.let {
+            Text(text = it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+        }
 
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -149,7 +165,18 @@ fun ExploreMealsScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(uiState.meals) { meal ->
-                        MealCard(meal = meal)
+                        MealCard(
+                            meal = meal,
+                            isFavorite = favoriteViewModel.isFavorite(meal.idMeal),
+                            onClick = {
+                                meal.idMeal?.let { id ->
+                                    navController.navigate("MealDetailScreen/$id")
+                                }
+                            },
+                            onFavoriteClick = {
+                                favoriteViewModel.toggleFavorite(meal)
+                            }
+                        )
                     }
                 }
             }
@@ -158,9 +185,16 @@ fun ExploreMealsScreen(
 }
 
 @Composable
-private fun MealCard(meal: Meal) {
+private fun MealCard(
+    meal: Meal,
+    isFavorite: Boolean,
+    onClick: () -> Unit,
+    onFavoriteClick: () -> Unit
+) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp)
     ) {
         Row(
@@ -192,6 +226,19 @@ private fun MealCard(meal: Meal) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(text = "Categoria: ${meal.category.orEmpty().ifBlank { "Sin dato" }}")
                 Text(text = "Pais: ${meal.area.orEmpty().ifBlank { "Sin dato" }}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = onFavoriteClick,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isFavorite) MaterialTheme.colorScheme.primary else Color.White,
+                        contentColor = if (isFavorite) Color.White else MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(Icons.Filled.Favorite, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = if (isFavorite) "En favoritos" else "Favorito")
+                }
             }
         }
     }

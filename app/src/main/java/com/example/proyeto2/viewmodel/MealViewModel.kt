@@ -49,4 +49,30 @@ class MealViewModel(
             }
         }
     }
+
+    fun loadMealDetail(mealId: String?) {
+        if (mealId.isNullOrBlank()) {
+            uiState = uiState.copy(errorMessage = "No se encontro la receta seleccionada.")
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(isLoading = true, selectedMeal = null, errorMessage = null)
+            runCatching {
+                repository.getMealById(mealId)
+            }.onSuccess { meal ->
+                uiState = uiState.copy(
+                    isLoading = false,
+                    selectedMeal = meal,
+                    errorMessage = if (meal == null) "No se encontro el detalle de la receta." else null
+                )
+            }.onFailure { exception ->
+                uiState = uiState.copy(
+                    isLoading = false,
+                    selectedMeal = null,
+                    errorMessage = exception.message ?: "No se pudo cargar el detalle de la receta."
+                )
+            }
+        }
+    }
 }

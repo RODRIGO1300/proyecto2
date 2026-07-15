@@ -101,4 +101,68 @@ class AuthRepository(
                     }
             }
     }
+
+    fun getCurrentUser(): AuthUser? {
+        val user = auth.currentUser ?: return null
+        return AuthUser(
+            uid = user.uid,
+            name = user.displayName.orEmpty(),
+            email = user.email.orEmpty(),
+            photoUrl = user.photoUrl?.toString().orEmpty(),
+            emailVerified = user.isEmailVerified
+        )
+    }
+
+    fun updateProfile(
+        name: String,
+        newPassword: String?,
+        onResult: (AuthResult) -> Unit
+    ) {
+        val user = auth.currentUser
+        if (user == null) {
+            onResult(AuthResult.Error("No hay usuario autenticado."))
+            return
+        }
+
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(name)
+            .build()
+
+        user.updateProfile(profileUpdates)
+            .addOnCompleteListener { profileTask ->
+                if (!profileTask.isSuccessful) {
+                    onResult(AuthResult.Error(profileTask.exception?.message ?: "No se pudo actualizar el nombre."))
+                    return@addOnCompleteListener
+                }
+
+                if (newPassword.isNullOrBlank()) {
+                    onResult(AuthResult.Success(user.toAuthUser(name)))
+                    return@addOnCompleteListener
+                }
+
+                user.updatePassword(newPassword)
+                    .addOnCompleteListener { passwordTask ->
+                        if (passwordTask.isSuccessful) {
+                            onResult(AuthResult.Success(user.toAuthUser(name)))
+                        } else {
+                            onResult(
+                                AuthResult.Error(
+                                    passwordTask.exception?.message
+                                        ?: "Nombre actualizado, pero no se pudo cambiar la contrasena."
+                                )
+                            )
+                        }
+                    }
+            }
+    }
+
+    private fun com.google.firebase.auth.FirebaseUser.toAuthUser(name: String? = null): AuthUser {
+        return AuthUser(
+            uid = uid,
+            name = name ?: displayName.orEmpty(),
+            email = email.orEmpty(),
+            photoUrl = photoUrl?.toString().orEmpty(),
+            emailVerified = isEmailVerified
+        )
+    }
 }

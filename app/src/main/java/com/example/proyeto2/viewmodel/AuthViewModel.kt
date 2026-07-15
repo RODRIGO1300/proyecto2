@@ -14,6 +14,15 @@ class AuthViewModel(
     var uiState by mutableStateOf(AuthUiState())
         private set
 
+    fun loadCurrentUser() {
+        val currentUser = repository.getCurrentUser()
+        uiState = uiState.copy(
+            user = currentUser,
+            isAuthenticated = currentUser != null,
+            isEmailVerified = currentUser?.emailVerified == true
+        )
+    }
+
     fun register(name: String, email: String, password: String) {
         val cleanName = name.trim()
         val cleanEmail = email.trim()
@@ -141,5 +150,55 @@ class AuthViewModel(
 
     fun clearMessage() {
         uiState = uiState.copy(errorMessage = null, successMessage = null)
+    }
+
+    fun updateProfile(name: String, password: String, repeatPassword: String) {
+        val cleanName = name.trim()
+        val cleanPassword = password.trim()
+        val cleanRepeatPassword = repeatPassword.trim()
+
+        when {
+            cleanName.isBlank() -> {
+                uiState = uiState.copy(errorMessage = "Ingresa tu nombre.")
+                return
+            }
+
+            cleanPassword.isNotBlank() && cleanPassword.length < 6 -> {
+                uiState = uiState.copy(errorMessage = "La nueva contrasena debe tener al menos 6 caracteres.")
+                return
+            }
+
+            cleanPassword != cleanRepeatPassword -> {
+                uiState = uiState.copy(errorMessage = "Las contrasenas no coinciden.")
+                return
+            }
+        }
+
+        uiState = uiState.copy(isLoading = true, errorMessage = null, successMessage = null)
+        repository.updateProfile(
+            name = cleanName,
+            newPassword = cleanPassword.ifBlank { null }
+        ) { result ->
+            uiState = when (result) {
+                is AuthResult.Success -> uiState.copy(
+                    isLoading = false,
+                    user = result.user,
+                    successMessage = "Perfil actualizado correctamente.",
+                    errorMessage = null
+                )
+
+                is AuthResult.Error -> uiState.copy(
+                    isLoading = false,
+                    errorMessage = result.message,
+                    successMessage = null
+                )
+
+                AuthResult.Cancelled -> uiState.copy(
+                    isLoading = false,
+                    errorMessage = "Actualizacion cancelada.",
+                    successMessage = null
+                )
+            }
+        }
     }
 }
