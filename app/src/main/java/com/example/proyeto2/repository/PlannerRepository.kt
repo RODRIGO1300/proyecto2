@@ -37,6 +37,7 @@ class PlannerRepository(
         day: String,
         mealTime: String,
         favorite: FavoriteMeal,
+        comments: String = "",
         onResult: (Result<Unit>) -> Unit
     ) {
         val userId = auth.currentUser?.uid
@@ -52,11 +53,30 @@ class PlannerRepository(
             idMeal = favorite.idMeal,
             nombre = favorite.nombre,
             imagen = favorite.imagen,
+            comentarios = comments,
             fecha = System.currentTimeMillis()
         )
 
         collection.document("${userId}_${day}_$mealTime")
             .set(slot)
+            .addOnSuccessListener { onResult(Result.success(Unit)) }
+            .addOnFailureListener { onResult(Result.failure(it)) }
+    }
+
+    fun updateComments(
+        day: String,
+        mealTime: String,
+        comments: String,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid
+        if (userId.isNullOrBlank()) {
+            onResult(Result.failure(IllegalStateException("Inicia sesion para editar comentarios.")))
+            return
+        }
+
+        collection.document("${userId}_${day}_$mealTime")
+            .update("comentarios", comments)
             .addOnSuccessListener { onResult(Result.success(Unit)) }
             .addOnFailureListener { onResult(Result.failure(it)) }
     }

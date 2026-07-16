@@ -7,5 +7,6 @@ data class MealPlanSlot(
     val idMeal: String = "",
     val nombre: String = "",
     val imagen: String = "",
+    val comentarios: String = "",
     val fecha: Long = 0L
 )

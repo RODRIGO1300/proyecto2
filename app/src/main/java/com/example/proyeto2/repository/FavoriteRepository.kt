@@ -95,4 +95,21 @@ class FavoriteRepository(
             .addOnSuccessListener { onResult(Result.success(Unit)) }
             .addOnFailureListener { onResult(Result.failure(it)) }
     }
+
+    fun updateFavoriteNote(
+        idMeal: String,
+        note: String,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid
+        if (userId.isNullOrBlank()) {
+            onResult(Result.failure(IllegalStateException("Inicia sesion para editar favoritos.")))
+            return
+        }
+
+        collection.document("${userId}_$idMeal")
+            .update("nota", note)
+            .addOnSuccessListener { onResult(Result.success(Unit)) }
+            .addOnFailureListener { onResult(Result.failure(it)) }
+    }
 }

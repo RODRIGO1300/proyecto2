@@ -36,12 +36,22 @@ class PlannerViewModel(
         }
     }
 
-    fun assignMeal(day: String, mealTime: String, favorite: FavoriteMeal) {
-        repository.assignMeal(day, mealTime, favorite) { result ->
+    fun assignMeal(day: String, mealTime: String, favorite: FavoriteMeal, comments: String = "") {
+        repository.assignMeal(day, mealTime, favorite, comments) { result ->
             uiState = if (result.isSuccess) {
                 uiState.copy(successMessage = "Platillo asignado.", errorMessage = null)
             } else {
                 uiState.copy(errorMessage = result.exceptionOrNull()?.message ?: "No se pudo asignar el platillo.")
+            }
+        }
+    }
+
+    fun updateComments(day: String, mealTime: String, comments: String) {
+        repository.updateComments(day, mealTime, comments) { result ->
+            uiState = if (result.isSuccess) {
+                uiState.copy(successMessage = "Comentarios actualizados.", errorMessage = null)
+            } else {
+                uiState.copy(errorMessage = result.exceptionOrNull()?.message ?: "No se pudieron actualizar comentarios.")
             }
         }
     }

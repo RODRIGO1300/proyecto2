@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -62,8 +64,7 @@ private val weekDays = listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes
 private val mealTimes = listOf("Almuerzo", "Comida", "Cena")
 
 @Composable
-fun PlannerScreen(
-    navController: NavHostController,
+fun PlannerScreen(navController: NavHostController,
     plannerViewModel: PlannerViewModel = viewModel(),
     favoriteViewModel: FavoriteViewModel = viewModel()
 ) {
@@ -72,6 +73,7 @@ fun PlannerScreen(
     val favoriteState = favoriteViewModel.uiState
     var selectedDay by remember { mutableStateOf<String?>(null) }
     var selectedMealTime by remember { mutableStateOf<String?>(null) }
+    var commentSlot by remember { mutableStateOf<MealPlanSlot?>(null) }
 
     LaunchedEffect(Unit) {
         plannerViewModel.observePlanner()
@@ -159,7 +161,8 @@ fun PlannerScreen(
                         onSelect = { mealTime ->
                             selectedDay = day
                             selectedMealTime = mealTime
-                        }
+                        },
+                        onComment = { slot -> commentSlot = slot }
                     )
                 }
             }
@@ -182,13 +185,25 @@ fun PlannerScreen(
             }
         )
     }
+
+    commentSlot?.let { slot ->
+        PlannerCommentDialog(
+            slot = slot,
+            onDismiss = { commentSlot = null },
+            onSave = { comments ->
+                plannerViewModel.updateComments(slot.dia, slot.tiempo, comments)
+                commentSlot = null
+            }
+        )
+    }
 }
 
 @Composable
 private fun DayPlannerCard(
     day: String,
     plannerViewModel: PlannerViewModel,
-    onSelect: (String) -> Unit
+    onSelect: (String) -> Unit,
+    onComment: (MealPlanSlot) -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -204,6 +219,7 @@ private fun DayPlannerCard(
                     title = mealTime,
                     slot = slot,
                     onSelect = { onSelect(mealTime) },
+                    onComment = { slot?.let(onComment) },
                     onClear = { plannerViewModel.clearSlot(day, mealTime) }
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -217,6 +233,7 @@ private fun MealTimeSlot(
     title: String,
     slot: MealPlanSlot?,
     onSelect: () -> Unit,
+    onComment: () -> Unit,
     onClear: () -> Unit
 ) {
     Row(
@@ -252,6 +269,16 @@ private fun MealTimeSlot(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+                if (!slot?.comentarios.isNullOrBlank()) {
+                    Text(
+                        text = "Comentario: ${slot?.comentarios.orEmpty()}",
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            IconButton(onClick = onComment) {
+                Icon(Icons.Filled.Edit, contentDescription = "Editar comentario")
             }
             IconButton(onClick = onClear) {
                 Icon(Icons.Filled.Close, contentDescription = "Limpiar")
@@ -316,11 +343,49 @@ private fun FavoritePickerDialog(
     )
 }
 
+@Composable
+private fun PlannerCommentDialog(
+    slot: MealPlanSlot,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var comments by remember(slot.dia, slot.tiempo, slot.idMeal) { mutableStateOf(slot.comentarios) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("${slot.dia} - ${slot.tiempo}") },
+        text = {
+            Column {
+                Text(text = slot.nombre, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = comments,
+                    onValueChange = { comments = it },
+                    label = { Text("Comentarios") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(comments) }) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
 private fun buildPlannerReport(slots: List<MealPlanSlot>): String {
     return weekDays.joinToString("\n\n") { day ->
         val rows = mealTimes.joinToString("\n") { mealTime ->
             val slot = slots.firstOrNull { it.dia == day && it.tiempo == mealTime }
-            "$mealTime: ${slot?.nombre?.ifBlank { "Sin asignar" } ?: "Sin asignar"}"
+            val dish = slot?.nombre?.ifBlank { "Sin asignar" } ?: "Sin asignar"
+            val comments = slot?.comentarios?.takeIf { it.isNotBlank() }?.let { " | Comentarios: $it" }.orEmpty()
+            "$mealTime: $dish$comments"
         }
         "$day\n$rows"
     }

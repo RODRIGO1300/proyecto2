@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,9 +30,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +64,7 @@ fun FavoritesScreen(
     favoriteViewModel: FavoriteViewModel = viewModel()
 ) {
     val uiState = favoriteViewModel.uiState
+    var editingFavorite by remember { mutableStateOf<FavoriteMeal?>(null) }
 
     LaunchedEffect(Unit) {
         favoriteViewModel.observeFavorites()
@@ -136,6 +145,7 @@ fun FavoritesScreen(
                     items(uiState.favorites) { favorite ->
                         FavoriteCard(
                             favorite = favorite,
+                            onEdit = { editingFavorite = favorite },
                             onDelete = { favoriteViewModel.removeFavorite(favorite.idMeal) }
                         )
                     }
@@ -143,11 +153,23 @@ fun FavoritesScreen(
             }
         }
     }
+
+    editingFavorite?.let { favorite ->
+        FavoriteNoteDialog(
+            favorite = favorite,
+            onDismiss = { editingFavorite = null },
+            onSave = { note ->
+                favoriteViewModel.updateFavoriteNote(favorite.idMeal, note)
+                editingFavorite = null
+            }
+        )
+    }
 }
 
 @Composable
 private fun FavoriteCard(
     favorite: FavoriteMeal,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     ElevatedCard(
@@ -182,14 +204,50 @@ private fun FavoriteCard(
                 )
                 Text(text = "Categoria: ${favorite.categoria.ifBlank { "Sin dato" }}")
                 Text(text = "Pais: ${favorite.pais.ifBlank { "Sin dato" }}")
+                Text(text = "Nota: ${favorite.nota.ifBlank { "Sin nota" }}")
                 Text(text = "Fecha: ${favorite.fecha.toShortDate()}")
             }
 
+            IconButton(onClick = onEdit) {
+                Icon(Icons.Filled.Edit, contentDescription = "Editar nota")
+            }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Filled.Delete, contentDescription = "Eliminar favorito")
             }
         }
     }
+}
+
+@Composable
+private fun FavoriteNoteDialog(
+    favorite: FavoriteMeal,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var note by remember(favorite.idMeal) { mutableStateOf(favorite.nota) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar nota") },
+        text = {
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text("Nota personal") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(note) }) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 private fun Long.toShortDate(): String {

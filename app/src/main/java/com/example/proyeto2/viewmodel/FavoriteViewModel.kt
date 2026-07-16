@@ -116,6 +116,16 @@ class FavoriteViewModel(
         }
     }
 
+    fun updateFavoriteNote(idMeal: String, note: String) {
+        repository.updateFavoriteNote(idMeal, note) { result ->
+            uiState = if (result.isSuccess) {
+                uiState.copy(successMessage = "Nota actualizada.", errorMessage = null)
+            } else {
+                uiState.copy(errorMessage = result.exceptionOrNull()?.message ?: "No se pudo actualizar la nota.")
+            }
+        }
+    }
+
     override fun onCleared() {
         favoritesListener?.remove()
         favoritesListener = null
