@@ -1,0 +1,3 @@
+- [x] Modify `LoginScreen.kt` to set `OutlinedTextField` colors to black
+- [x] Modify `RegisterScreen.kt` to set `OutlinedTextField` colors to black
+- [x] Verify changes in both files

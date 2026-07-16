@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -158,7 +159,7 @@ fun ProfileScreen(
                             OutlinedTextField(
                                 value = repeatPassword,
                                 onValueChange = { repeatPassword = it },
-                                label = { Text("Repetir contrasena") },
+                                label = { Text("Confirmar contrasena") },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 visualTransformation = PasswordVisualTransformation(),
