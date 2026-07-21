@@ -154,7 +154,7 @@ class AuthViewModel(
 
     fun updateProfile(name: String, photoUrl: String = "") {
         val cleanName = name.trim()
-        val cleanPhotoUrl = photoUrl.trim()
+        val cleanPhotoUrl = photoUrl.trim().normalizeImageUrl()
 
         if (cleanName.isBlank()) {
             uiState = uiState.copy(errorMessage = "Ingresa tu nombre.")
@@ -289,6 +289,15 @@ class AuthViewModel(
                     isPasswordResetSent = false
                 )
             }
+        }
+    }
+
+    private fun String.normalizeImageUrl(): String {
+        if (isBlank()) return ""
+        return if (startsWith("http://", ignoreCase = true) || startsWith("https://", ignoreCase = true)) {
+            this
+        } else {
+            "https://$this"
         }
     }
 }

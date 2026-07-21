@@ -66,7 +66,6 @@ import com.example.proyeto2.ui.components.AppTextFieldColors
 import com.example.proyeto2.ui.theme.GradientSofisticado
 import com.example.proyeto2.ui.theme.RecipeCream
 import com.example.proyeto2.ui.theme.RecipeForest
-import com.example.proyeto2.ui.theme.RecipeInk
 import com.example.proyeto2.ui.theme.RecipeMuted
 import com.example.proyeto2.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -159,7 +158,7 @@ fun ProfileScreen(
                                 text = name.ifBlank { "Usuario" },
                                 fontSize = 30.sp,
                                 fontWeight = FontWeight.Black,
-                                color = RecipeInk
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -349,13 +348,13 @@ private fun PasswordUpdateCard(
         ) {
             Text(
                 text = "Actualizar contrasena",
-                color = RecipeInk,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Black
             )
             Text(
                 text = "Confirma tu contrasena actual para proteger tu cuenta.",
-                color = RecipeMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.SemiBold
             )
 
@@ -480,6 +479,6 @@ private fun ProfileInfoRow(
             modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, color = RecipeMuted, fontWeight = FontWeight.SemiBold)
+        Text(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
     }
 }

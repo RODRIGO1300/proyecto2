@@ -18,6 +18,9 @@ val RecipeBerry = Color(0xFFC0397D)
 val RecipeTomato = Color(0xFFE94B35)
 val RecipeMint = Color(0xFF4ECDC4)
 val RecipeGrape = Color(0xFF5142A6)
+val RecipeDarkSurface = Color(0xFF22302A)
+val RecipeDarkSurfaceVariant = Color(0xFF314139)
+val RecipeLightSurfaceVariant = Color(0xFFEADCCC)
 
 val RecipeBackgroundGradient = Brush.linearGradient(
     listOf(RecipeInk, RecipeForest, RecipeCoral, RecipeHoney)

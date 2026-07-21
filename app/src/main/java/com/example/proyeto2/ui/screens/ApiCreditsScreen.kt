@@ -42,8 +42,6 @@ import com.example.proyeto2.ui.components.AppScreenTitle
 import com.example.proyeto2.ui.theme.ApiCreditsGradient
 import com.example.proyeto2.ui.theme.RecipeCream
 import com.example.proyeto2.ui.theme.RecipeForest
-import com.example.proyeto2.ui.theme.RecipeInk
-import com.example.proyeto2.ui.theme.RecipeMuted
 
 private const val THE_MEAL_DB_URL = "https://www.themealdb.com/"
 
@@ -100,7 +98,7 @@ fun ApiCreditsScreen(navController: NavHostController) {
 
                             Text(
                                 text = "Gracias a TheMealDB",
-                                color = RecipeInk,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Black
                             )
@@ -109,7 +107,7 @@ fun ApiCreditsScreen(navController: NavHostController) {
 
                             Text(
                                 text = "RecipeBook utiliza informacion, imagenes y datos de recetas proporcionados por TheMealDB mediante su API publica. Este proyecto reconoce y agradece a sus creadores por mantener una fuente abierta para aprender, explorar y construir aplicaciones educativas.",
-                                color = RecipeMuted,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.SemiBold,
                                 lineHeight = 21.sp
                             )
@@ -164,6 +162,6 @@ private fun CreditPoint(text: String) {
             modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, color = RecipeMuted, fontWeight = FontWeight.SemiBold)
+        Text(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
     }
 }

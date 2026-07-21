@@ -12,20 +12,36 @@ import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = RecipeLeaf,
+    onPrimary = RecipeInk,
     secondary = RecipeHoney,
+    onSecondary = RecipeInk,
     tertiary = RecipeCoral,
+    onTertiary = RecipeInk,
     background = RecipeInk,
-    surface = RecipeSurface,
-    error = RecipeError
+    onBackground = RecipeCream,
+    surface = RecipeDarkSurface,
+    onSurface = RecipeCream,
+    surfaceVariant = RecipeDarkSurfaceVariant,
+    onSurfaceVariant = RecipeSurface,
+    error = RecipeError,
+    onError = RecipeCream
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = RecipeForest,
+    onPrimary = RecipeCream,
     secondary = RecipeHoney,
+    onSecondary = RecipeInk,
     tertiary = RecipeCoral,
+    onTertiary = RecipeInk,
     background = RecipeCream,
+    onBackground = RecipeInk,
     surface = RecipeSurface,
-    error = RecipeError
+    onSurface = RecipeInk,
+    surfaceVariant = RecipeLightSurfaceVariant,
+    onSurfaceVariant = RecipeMuted,
+    error = RecipeError,
+    onError = RecipeCream
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

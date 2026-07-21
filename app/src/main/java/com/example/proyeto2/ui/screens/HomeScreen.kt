@@ -64,7 +64,6 @@ import com.example.proyeto2.ui.components.AppConfirmDialog
 import com.example.proyeto2.ui.theme.GradientOtono
 import com.example.proyeto2.ui.theme.RecipeCream
 import com.example.proyeto2.ui.theme.RecipeForest
-import com.example.proyeto2.ui.theme.RecipeInk
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.FirebaseAuth
 
@@ -129,7 +128,7 @@ fun HomeScreen(navController: NavHostController) {
                     fontSize = 46.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Cursive,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = RecipeCream
                 )
 
                 Spacer(modifier = Modifier.height(34.dp))
@@ -274,8 +273,18 @@ private fun TopAccountAction(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Column {
-                        Text(text = displayName, fontSize = 15.sp, fontWeight = FontWeight.Black, color = RecipeInk)
-                        Text(text = "Perfil", color = RecipeForest, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text(
+                            text = displayName,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Perfil",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
                     }
                 }
             }
