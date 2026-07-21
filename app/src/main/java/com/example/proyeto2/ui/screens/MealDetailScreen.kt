@@ -29,6 +29,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +51,7 @@ import com.example.proyeto2.models.meal.Meal
 import com.example.proyeto2.models.meal.ingredientMeasures
 import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.theme.GradientTierra
+import com.example.proyeto2.utils.TranslationHelper
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -126,6 +131,12 @@ private fun MealDetailContent(
     isFavoriteError: Boolean,
     onFavoriteClick: () -> Unit
 ) {
+    var translatedIngredients by remember(meal.idMeal) { mutableStateOf<String?>(null) }
+    var translatedInstructions by remember(meal.idMeal) { mutableStateOf<String?>(null) }
+    var isTranslatingIngredients by remember(meal.idMeal) { mutableStateOf(false) }
+    var isTranslatingInstructions by remember(meal.idMeal) { mutableStateOf(false) }
+    var translationMessage by remember(meal.idMeal) { mutableStateOf<String?>(null) }
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(14.dp),
         modifier = Modifier.fillMaxSize()
@@ -183,15 +194,45 @@ private fun MealDetailContent(
                 if (ingredients.isEmpty()) {
                     Text(text = "Sin ingredientes disponibles.")
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ingredients.forEach { item ->
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    text = item.name,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Text(text = item.measure.ifBlank { "-" })
+                    val ingredientsText = ingredients.joinToString("\n") { item ->
+                        "${item.name}: ${item.measure.ifBlank { "-" }}"
+                    }
+
+                    TranslateButton(
+                        text = if (translatedIngredients == null) "Traducir ingredientes" else "Actualizar traduccion",
+                        isLoading = isTranslatingIngredients,
+                        onClick = {
+                            isTranslatingIngredients = true
+                            translationMessage = null
+                            TranslationHelper.translateEnglishToSpanish(
+                                text = ingredientsText,
+                                onSuccess = { translatedText ->
+                                    translatedIngredients = translatedText
+                                    isTranslatingIngredients = false
+                                },
+                                onError = { message ->
+                                    translationMessage = message
+                                    isTranslatingIngredients = false
+                                }
+                            )
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    if (translatedIngredients != null) {
+                        Text(text = translatedIngredients.orEmpty())
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            ingredients.forEach { item ->
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = item.name,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(text = item.measure.ifBlank { "-" })
+                                }
                             }
                         }
                     }
@@ -201,7 +242,43 @@ private fun MealDetailContent(
 
         item {
             DetailSection(title = "Indicaciones") {
-                Text(text = meal.instructions.orEmpty().ifBlank { "Sin indicaciones disponibles." })
+                val instructions = meal.instructions.orEmpty().trim()
+                if (instructions.isBlank()) {
+                    Text(text = "Sin indicaciones disponibles.")
+                } else {
+                    TranslateButton(
+                        text = if (translatedInstructions == null) "Traducir indicaciones" else "Actualizar traduccion",
+                        isLoading = isTranslatingInstructions,
+                        onClick = {
+                            isTranslatingInstructions = true
+                            translationMessage = null
+                            TranslationHelper.translateEnglishToSpanish(
+                                text = instructions,
+                                onSuccess = { translatedText ->
+                                    translatedInstructions = translatedText
+                                    isTranslatingInstructions = false
+                                },
+                                onError = { message ->
+                                    translationMessage = message
+                                    isTranslatingInstructions = false
+                                }
+                            )
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(text = translatedInstructions ?: instructions)
+                }
+
+                translationMessage?.let { message ->
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
 
@@ -240,6 +317,30 @@ private fun MealDetailContent(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TranslateButton(
+    text: String,
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = !isLoading,
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.height(18.dp),
+                strokeWidth = 2.dp
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Traduciendo...")
+        } else {
+            Text(text = text, fontWeight = FontWeight.Bold)
         }
     }
 }

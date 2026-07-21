@@ -69,7 +69,7 @@ fun ApiCreditsScreen(navController: NavHostController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AppScreenTitle(
-                        title = "Creditos de API",
+                        title = "Creditos de la API",
                         subtitle = "Uso responsable de informacion publica"
                     )
 
@@ -106,7 +106,7 @@ fun ApiCreditsScreen(navController: NavHostController) {
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Text(
-                                text = "RecipeBook utiliza informacion, imagenes y datos de recetas proporcionados por TheMealDB mediante su API publica. Este proyecto reconoce y agradece a sus creadores por mantener una fuente abierta para aprender, explorar y construir aplicaciones educativas.",
+                                text = "Recetario utiliza informacion, imagenes y datos de recetas proporcionados por TheMealDB mediante su API publica. Este proyecto reconoce y agradece a sus creadores por mantener una fuente abierta para aprender, explorar y construir aplicaciones educativas.",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.SemiBold,
                                 lineHeight = 21.sp

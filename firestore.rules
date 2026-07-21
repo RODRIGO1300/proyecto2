@@ -1,0 +1,142 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: Users
+    // Document ID: Firebase Auth uid
+    // Fields:
+    //   - uid: string, required, immutable owner id
+    //   - name: string, required, 1..80 chars
+    //   - email: string, required, same as authenticated email
+    //   - photoUrl: string, optional, empty/http/https URL
+    //   - emailVerified: bool, required
+    //   - updatedAt: number, required
+    //
+    // Collection: Favoritos
+    // Document ID: {uid}_{idMeal}
+    // Fields:
+    //   - idUsuario: string, required, immutable owner id
+    //   - idMeal, nombre, imagen, categoria, pais, nota: strings
+    //   - fecha: number, required
+    //
+    // Collection: MealPlanner
+    // Document ID: {uid}_{dia}_{tiempo}
+    // Fields:
+    //   - idUsuario: string, required, immutable owner id
+    //   - dia, tiempo, idMeal, nombre, imagen, comentarios: strings
+    //   - fecha: number, required
+    //
+    // ===============================================================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function hasOnly(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    function hasAll(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    function validString(data, field, minLen, maxLen) {
+      return data[field] is string
+        && data[field].size() >= minLen
+        && data[field].size() <= maxLen;
+    }
+
+    function validOptionalString(data, field, maxLen) {
+      return !data.keys().hasAny([field])
+        || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function validOptionalUrl(data, field) {
+      return !data.keys().hasAny([field])
+        || data[field] == ''
+        || (data[field] is string
+          && data[field].size() <= 500
+          && (data[field].matches('^https://.*') || data[field].matches('^http://.*')));
+    }
+
+    function validOwnerField(data) {
+      return data.idUsuario is string && data.idUsuario == request.auth.uid;
+    }
+
+    function ownerFieldUnchanged() {
+      return request.resource.data.idUsuario == resource.data.idUsuario;
+    }
+
+    function validUser(data, userId) {
+      return hasOnly(data, ['uid', 'name', 'email', 'photoUrl', 'emailVerified', 'updatedAt'])
+        && hasAll(data, ['uid', 'name', 'email', 'emailVerified', 'updatedAt'])
+        && data.uid == userId
+        && data.uid == request.auth.uid
+        && validString(data, 'name', 1, 80)
+        && data.email is string
+        && data.email == request.auth.token.email
+        && validOptionalUrl(data, 'photoUrl')
+        && data.emailVerified is bool
+        && data.updatedAt is number;
+    }
+
+    function validFavorite(data) {
+      return hasOnly(data, ['idUsuario', 'idMeal', 'nombre', 'imagen', 'categoria', 'pais', 'nota', 'fecha'])
+        && hasAll(data, ['idUsuario', 'idMeal', 'nombre', 'imagen', 'categoria', 'pais', 'nota', 'fecha'])
+        && validOwnerField(data)
+        && validString(data, 'idMeal', 1, 40)
+        && validString(data, 'nombre', 1, 120)
+        && validOptionalString(data, 'imagen', 500)
+        && validOptionalString(data, 'categoria', 80)
+        && validOptionalString(data, 'pais', 80)
+        && validOptionalString(data, 'nota', 500)
+        && data.fecha is number;
+    }
+
+    function validPlannerSlot(data) {
+      return hasOnly(data, ['idUsuario', 'dia', 'tiempo', 'idMeal', 'nombre', 'imagen', 'comentarios', 'fecha'])
+        && hasAll(data, ['idUsuario', 'dia', 'tiempo', 'idMeal', 'nombre', 'imagen', 'comentarios', 'fecha'])
+        && validOwnerField(data)
+        && data.dia in ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
+        && data.tiempo in ['Almuerzo', 'Comida', 'Cena']
+        && validString(data, 'idMeal', 1, 40)
+        && validString(data, 'nombre', 1, 120)
+        && validOptionalString(data, 'imagen', 500)
+        && validOptionalString(data, 'comentarios', 500)
+        && data.fecha is number;
+    }
+
+    match /Users/{userId} {
+      allow create, update: if isOwner(userId) && validUser(request.resource.data, userId);
+      allow get: if isOwner(userId);
+      allow list, delete: if false;
+    }
+
+    match /Favoritos/{favoriteId} {
+      allow create: if isSignedIn() && validFavorite(request.resource.data);
+      allow get, list: if isSignedIn() && resource.data.idUsuario == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.idUsuario == request.auth.uid
+        && ownerFieldUnchanged()
+        && validFavorite(request.resource.data);
+      allow delete: if isSignedIn() && resource.data.idUsuario == request.auth.uid;
+    }
+
+    match /MealPlanner/{slotId} {
+      allow create: if isSignedIn() && validPlannerSlot(request.resource.data);
+      allow get, list: if isSignedIn() && resource.data.idUsuario == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.idUsuario == request.auth.uid
+        && ownerFieldUnchanged()
+        && validPlannerSlot(request.resource.data);
+      allow delete: if isSignedIn() && resource.data.idUsuario == request.auth.uid;
+    }
+  }
+}

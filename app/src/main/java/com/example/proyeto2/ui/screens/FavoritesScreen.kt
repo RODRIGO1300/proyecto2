@@ -52,6 +52,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.models.favorite.FavoriteMeal
 import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.components.AppScreenTitle
+import com.example.proyeto2.ui.components.AppTextFieldColors
 import com.example.proyeto2.ui.theme.GradientAurora
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -226,7 +227,8 @@ private fun FavoriteNoteDialog(
                 value = note,
                 onValueChange = { note = it },
                 label = { Text("Nota personal") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = AppTextFieldColors()
             )
         },
         confirmButton = {

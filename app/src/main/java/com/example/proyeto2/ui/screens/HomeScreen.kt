@@ -113,7 +113,7 @@ fun HomeScreen(navController: NavHostController) {
 
                 Image(
                     painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo RecipeBook",
+                    contentDescription = "Logo de Recetario",
                     modifier = Modifier
                         .size(124.dp)
                         .clip(CircleShape)
@@ -124,7 +124,7 @@ fun HomeScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Recipe App",
+                    text = "Recetario",
                     fontSize = 46.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Cursive,
@@ -170,7 +170,7 @@ fun HomeScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(14.dp))
 
                 MainMenuButton(
-                    text = "Creditos de API",
+                    text = "Creditos de la API",
                     icon = Icons.Filled.Info,
                     onClick = { navController.navigate("ApiCreditsScreen") }
                 )
@@ -199,7 +199,7 @@ fun HomeScreen(navController: NavHostController) {
     AppConfirmDialog(
         visible = showExitDialog,
         title = "Salir de la app",
-        message = "Estas seguro de que deseas salir de RecipeBook?",
+        message = "Estas seguro de que deseas salir de Recetario?",
         confirmText = "Salir",
         dismissText = "Cancelar",
         onConfirm = {

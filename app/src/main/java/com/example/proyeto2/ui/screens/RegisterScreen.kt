@@ -41,7 +41,6 @@ import com.example.proyeto2.ui.components.AppFormCard
 import com.example.proyeto2.ui.components.AppPrimaryButton
 import com.example.proyeto2.ui.components.AppTextFieldColors
 import com.example.proyeto2.ui.theme.GradientVital
-import com.example.proyeto2.ui.theme.RecipeInk
 import com.example.proyeto2.viewmodel.AuthViewModel
 
 @Composable
@@ -81,11 +80,11 @@ fun RegisterScreen(
             ) {
                 AppFormCard {
                         Text(
-                            text = "REGISTRO",
+                            text = "CREAR CUENTA",
                             fontSize = 46.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Cursive,
-                            color = RecipeInk
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Spacer(modifier = Modifier.height(34.dp))

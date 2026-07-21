@@ -41,11 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.proyeto2.ui.theme.RecipeBackgroundGradient
-import com.example.proyeto2.ui.theme.RecipeCream
-import com.example.proyeto2.ui.theme.RecipeForest
-import com.example.proyeto2.ui.theme.RecipeInk
-import com.example.proyeto2.ui.theme.RecipeMuted
-import com.example.proyeto2.ui.theme.RecipeSurface
 
 @Composable
 fun AppGradientBackground(
@@ -89,7 +84,7 @@ fun AppBackButton(
     AppConfirmDialog(
         visible = showExitDialog,
         title = "Salir de la app",
-        message = "Estas seguro de que deseas salir de RecipeBook?",
+        message = "Estas seguro de que deseas salir de Recetario?",
         confirmText = "Salir",
         dismissText = "Cancelar",
         onConfirm = {
@@ -114,7 +109,7 @@ fun AppPrimaryButton(
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = RecipeCream
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         content = content
     )
@@ -130,7 +125,7 @@ fun AppFormCard(
             .fillMaxWidth()
             .widthIn(max = 430.dp),
         shape = RoundedCornerShape(18.dp),
-        color = RecipeCream.copy(alpha = 0.94f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
         tonalElevation = 6.dp,
         shadowElevation = 8.dp
     ) {
@@ -147,12 +142,23 @@ fun AppFormCard(
 
 @Composable
 fun AppTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
-    focusedTextColor = RecipeInk,
-    unfocusedTextColor = RecipeInk,
-    focusedLabelColor = RecipeForest,
-    unfocusedLabelColor = RecipeMuted,
-    focusedBorderColor = RecipeForest,
-    unfocusedBorderColor = RecipeSurface
+    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+    disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+    errorTextColor = MaterialTheme.colorScheme.onSurface,
+    cursorColor = MaterialTheme.colorScheme.primary,
+    focusedLabelColor = MaterialTheme.colorScheme.primary,
+    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    errorLabelColor = MaterialTheme.colorScheme.error,
+    focusedBorderColor = MaterialTheme.colorScheme.primary,
+    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+    errorBorderColor = MaterialTheme.colorScheme.error,
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent,
+    disabledContainerColor = Color.Transparent,
+    errorContainerColor = Color.Transparent,
+    focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
 )
 
 @Composable

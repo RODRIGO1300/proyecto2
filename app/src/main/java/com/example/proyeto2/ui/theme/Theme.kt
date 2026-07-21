@@ -23,6 +23,8 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = RecipeCream,
     surfaceVariant = RecipeDarkSurfaceVariant,
     onSurfaceVariant = RecipeSurface,
+    outline = RecipeDarkOutline,
+    outlineVariant = RecipeDarkSurfaceVariant,
     error = RecipeError,
     onError = RecipeCream
 )
@@ -40,6 +42,8 @@ private val LightColorScheme = lightColorScheme(
     onSurface = RecipeInk,
     surfaceVariant = RecipeLightSurfaceVariant,
     onSurfaceVariant = RecipeMuted,
+    outline = RecipeLightOutline,
+    outlineVariant = RecipeLightSurfaceVariant,
     error = RecipeError,
     onError = RecipeCream
 

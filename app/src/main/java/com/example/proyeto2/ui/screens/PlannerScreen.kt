@@ -55,6 +55,7 @@ import com.example.proyeto2.models.favorite.FavoriteMeal
 import com.example.proyeto2.models.planner.MealPlanSlot
 import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.components.AppScreenTitle
+import com.example.proyeto2.ui.components.AppTextFieldColors
 import com.example.proyeto2.ui.theme.GradientNaturaleza
 import com.example.proyeto2.utils.PdfUtils
 import com.example.proyeto2.viewmodel.FavoriteViewModel
@@ -113,7 +114,7 @@ fun PlannerScreen(navController: NavHostController,
                     context = context,
                     nombreArchivo = "Plan_Semanal_De_Comidas",
                     titulo = "Plan semanal de comidas",
-                    subtitulo = "RecipeBook",
+                    subtitulo = "Recetario",
                     contenido = contenido
                 )
             },
@@ -354,7 +355,8 @@ private fun PlannerCommentDialog(
                     value = comments,
                     onValueChange = { comments = it },
                     label = { Text("Comentarios") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = AppTextFieldColors()
                 )
             }
         },

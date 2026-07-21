@@ -48,7 +48,6 @@ import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.components.AppFormCard
 import com.example.proyeto2.ui.components.AppPrimaryButton
 import com.example.proyeto2.ui.components.AppTextFieldColors
-import com.example.proyeto2.ui.theme.RecipeInk
 import com.example.proyeto2.ui.theme.GradientTotal
 import com.example.proyeto2.viewmodel.AuthViewModel
 
@@ -109,7 +108,7 @@ fun LoginScreen(
                 AppFormCard {
                         Image(
                             painter = painterResource(id = R.drawable.logo),
-                            contentDescription = "Logo RecipeBook",
+                            contentDescription = "Logo de Recetario",
                             modifier = Modifier
                                 .size(104.dp)
                                 .clip(CircleShape),
@@ -119,11 +118,11 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "LOGIN",
+                            text = "INICIAR SESION",
                             fontSize = 46.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Cursive,
-                            color = RecipeInk
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Spacer(modifier = Modifier.height(34.dp))
