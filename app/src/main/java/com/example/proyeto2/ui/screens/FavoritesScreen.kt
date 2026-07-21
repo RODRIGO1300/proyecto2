@@ -54,6 +54,7 @@ import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.components.AppScreenTitle
 import com.example.proyeto2.ui.theme.GradientAurora
 import com.example.proyeto2.viewmodel.FavoriteViewModel
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,9 +66,14 @@ fun FavoritesScreen(
 ) {
     val uiState = favoriteViewModel.uiState
     var editingFavorite by remember { mutableStateOf<FavoriteMeal?>(null) }
+    val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
 
-    LaunchedEffect(Unit) {
-        favoriteViewModel.observeFavorites()
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            favoriteViewModel.observeFavorites()
+        } else {
+            navController.navigate("LoginScreen")
+        }
     }
 
     Column(

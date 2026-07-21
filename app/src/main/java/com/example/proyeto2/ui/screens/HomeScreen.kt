@@ -1,5 +1,7 @@
 package com.example.proyeto2.ui.screens
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,11 +19,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -33,29 +39,54 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.proyeto2.R
+import com.example.proyeto2.ui.components.AppConfirmDialog
 import com.example.proyeto2.ui.theme.GradientOtono
 import com.example.proyeto2.ui.theme.RecipeCream
 import com.example.proyeto2.ui.theme.RecipeForest
 import com.example.proyeto2.ui.theme.RecipeInk
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
+    val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
-    val currentUser = auth.currentUser
+    var currentUser by remember { mutableStateOf(auth.currentUser) }
     val displayName = currentUser?.displayName?.takeIf { it.isNotBlank() } ?: "Usuario"
+    val isLoggedIn = currentUser != null
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    BackHandler {
+        showExitDialog = true
+    }
+
+    DisposableEffect(Unit) {
+        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            currentUser = firebaseAuth.currentUser
+        }
+        auth.addAuthStateListener(listener)
+        onDispose { auth.removeAuthStateListener(listener) }
+    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -66,17 +97,31 @@ fun HomeScreen(navController: NavHostController) {
                 .padding(24.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProfileHeader(
-                    name = displayName,
-                    photoUrl = currentUser?.photoUrl?.toString().orEmpty(),
-                    isEmailVerified = currentUser?.isEmailVerified == true,
-                    onClick = { navController.navigate("ProfileScreen") }
+                TopAccountAction(
+                    user = currentUser,
+                    displayName = displayName,
+                    onProfileClick = { navController.navigate("ProfileScreen") },
+                    onLoginClick = { navController.navigate("LoginScreen") }
                 )
 
-                Spacer(modifier = Modifier.height(38.dp))
+                Spacer(modifier = Modifier.height(28.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Logo RecipeBook",
+                    modifier = Modifier
+                        .size(124.dp)
+                        .clip(CircleShape)
+                        .border(BorderStroke(3.dp, RecipeCream), CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = "Recipe App",
@@ -86,7 +131,7 @@ fun HomeScreen(navController: NavHostController) {
                     color = MaterialTheme.colorScheme.onPrimary
                 )
 
-                Spacer(modifier = Modifier.height(44.dp))
+                Spacer(modifier = Modifier.height(34.dp))
 
                 MainMenuButton(
                     text = "Explorar recetas",
@@ -99,7 +144,13 @@ fun HomeScreen(navController: NavHostController) {
                 MainMenuButton(
                     text = "Favoritos",
                     icon = Icons.Filled.Favorite,
-                    onClick = { navController.navigate("FavoritesScreen") }
+                    onClick = {
+                        if (isLoggedIn) {
+                            navController.navigate("FavoritesScreen")
+                        } else {
+                            navController.navigate("LoginScreen")
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -107,90 +158,110 @@ fun HomeScreen(navController: NavHostController) {
                 MainMenuButton(
                     text = "Planeador",
                     icon = Icons.Filled.DateRange,
-                    onClick = { navController.navigate("PlannerScreen") }
+                    onClick = {
+                        if (isLoggedIn) {
+                            navController.navigate("PlannerScreen")
+                        } else {
+                            navController.navigate("LoginScreen")
+                        }
+                    }
                 )
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                OutlinedButton(
-                    onClick = {
-                        auth.signOut()
-                        navController.navigate("LoginScreen") {
-                            popUpTo("HomeScreen") { inclusive = true }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-                ) {
-                    Text(text = "Cerrar sesion", fontWeight = FontWeight.Bold)
-                }
+                MainMenuButton(
+                    text = "Creditos de API",
+                    icon = Icons.Filled.Info,
+                    onClick = { navController.navigate("ApiCreditsScreen") }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
+
+    AppConfirmDialog(
+        visible = showExitDialog,
+        title = "Salir de la app",
+        message = "Estas seguro de que deseas salir de RecipeBook?",
+        confirmText = "Salir",
+        dismissText = "Cancelar",
+        onConfirm = {
+            showExitDialog = false
+            (context as? Activity)?.finish()
+        },
+        onDismiss = { showExitDialog = false }
+    )
 }
 
 @Composable
-private fun ProfileHeader(
-    name: String,
-    photoUrl: String,
-    isEmailVerified: Boolean,
-    onClick: () -> Unit
+private fun TopAccountAction(
+    user: FirebaseUser?,
+    displayName: String,
+    onProfileClick: () -> Unit,
+    onLoginClick: () -> Unit
 ) {
-    ElevatedCard(
+    Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(18.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (photoUrl.isBlank()) {
-                Box(
-                    modifier = Modifier
-                        .size(58.dp)
-                        .clip(CircleShape)
-                        .background(RecipeForest)
-                        .border(BorderStroke(2.dp, RecipeCream), CircleShape),
-                    contentAlignment = Alignment.Center
+        if (user == null) {
+            OutlinedButton(
+                onClick = onLoginClick,
+                shape = RoundedCornerShape(999.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            ) {
+                Text("Iniciar sesion", fontWeight = FontWeight.Bold)
+            }
+        } else {
+            ElevatedCard(
+                modifier = Modifier
+                    .widthIn(max = 260.dp)
+                    .clickable(onClick = onProfileClick),
+                shape = RoundedCornerShape(999.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = null,
-                        tint = RecipeCream,
-                        modifier = Modifier.size(34.dp)
-                    )
+                    val photoUrl = user.photoUrl?.toString().orEmpty()
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(RecipeForest)
+                            .border(BorderStroke(2.dp, RecipeCream), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (photoUrl.isBlank()) {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = null,
+                                tint = RecipeCream,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        } else {
+                            Image(
+                                painter = rememberAsyncImagePainter(photoUrl),
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Column {
+                        Text(text = displayName, fontSize = 15.sp, fontWeight = FontWeight.Black, color = RecipeInk)
+                        Text(text = "Perfil", color = RecipeForest, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
                 }
-            } else {
-                Image(
-                    painter = rememberAsyncImagePainter(photoUrl),
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier
-                        .size(58.dp)
-                        .clip(CircleShape)
-                        .border(BorderStroke(2.dp, RecipeCream), CircleShape),
-                    contentScale = ContentScale.Crop
-                )
             }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = name, fontSize = 20.sp, fontWeight = FontWeight.Black, color = RecipeInk)
-                Text(
-                    text = if (isEmailVerified) "Perfil verificado" else "Perfil sin verificar",
-                    color = if (isEmailVerified) RecipeForest else MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Text(text = "Editar", fontWeight = FontWeight.Bold, color = RecipeForest)
         }
     }
 }

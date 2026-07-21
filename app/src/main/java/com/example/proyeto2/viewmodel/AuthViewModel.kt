@@ -153,32 +153,17 @@ class AuthViewModel(
         uiState = uiState.copy(errorMessage = null, successMessage = null)
     }
 
-    fun updateProfile(name: String, password: String, repeatPassword: String, photoUri: Uri? = null) {
+    fun updateProfile(name: String, photoUri: Uri? = null) {
         val cleanName = name.trim()
-        val cleanPassword = password.trim()
-        val cleanRepeatPassword = repeatPassword.trim()
 
-        when {
-            cleanName.isBlank() -> {
-                uiState = uiState.copy(errorMessage = "Ingresa tu nombre.")
-                return
-            }
-
-            cleanPassword.isNotBlank() && cleanPassword.length < 6 -> {
-                uiState = uiState.copy(errorMessage = "La nueva contrasena debe tener al menos 6 caracteres.")
-                return
-            }
-
-            cleanPassword != cleanRepeatPassword -> {
-                uiState = uiState.copy(errorMessage = "Las contrasenas no coinciden.")
-                return
-            }
+        if (cleanName.isBlank()) {
+            uiState = uiState.copy(errorMessage = "Ingresa tu nombre.")
+            return
         }
 
         uiState = uiState.copy(isLoading = true, errorMessage = null, successMessage = null)
         repository.updateProfile(
             name = cleanName,
-            newPassword = cleanPassword.ifBlank { null },
             photoUri = photoUri
         ) { result ->
             uiState = when (result) {
@@ -186,6 +171,61 @@ class AuthViewModel(
                     isLoading = false,
                     user = result.user,
                     successMessage = "Perfil actualizado correctamente.",
+                    errorMessage = null
+                )
+
+                is AuthResult.Error -> uiState.copy(
+                    isLoading = false,
+                    errorMessage = result.message,
+                    successMessage = null
+                )
+
+                AuthResult.Cancelled -> uiState.copy(
+                    isLoading = false,
+                    errorMessage = "Actualizacion cancelada.",
+                    successMessage = null
+                )
+            }
+        }
+    }
+
+    fun updatePassword(currentPassword: String, newPassword: String, repeatPassword: String) {
+        val cleanCurrentPassword = currentPassword.trim()
+        val cleanNewPassword = newPassword.trim()
+        val cleanRepeatPassword = repeatPassword.trim()
+
+        when {
+            cleanCurrentPassword.isBlank() -> {
+                uiState = uiState.copy(errorMessage = "Ingresa tu contrasena actual.")
+                return
+            }
+
+            cleanNewPassword.length < 6 -> {
+                uiState = uiState.copy(errorMessage = "La nueva contrasena debe tener al menos 6 caracteres.")
+                return
+            }
+
+            cleanNewPassword != cleanRepeatPassword -> {
+                uiState = uiState.copy(errorMessage = "Las contrasenas no coinciden.")
+                return
+            }
+
+            cleanCurrentPassword == cleanNewPassword -> {
+                uiState = uiState.copy(errorMessage = "La nueva contrasena debe ser diferente a la actual.")
+                return
+            }
+        }
+
+        uiState = uiState.copy(isLoading = true, errorMessage = null, successMessage = null)
+        repository.updatePassword(
+            currentPassword = cleanCurrentPassword,
+            newPassword = cleanNewPassword
+        ) { result ->
+            uiState = when (result) {
+                is AuthResult.Success -> uiState.copy(
+                    isLoading = false,
+                    user = result.user,
+                    successMessage = "Contrasena actualizada correctamente.",
                     errorMessage = null
                 )
 

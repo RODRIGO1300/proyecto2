@@ -59,6 +59,7 @@ import com.example.proyeto2.ui.theme.GradientNaturaleza
 import com.example.proyeto2.utils.PdfUtils
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.PlannerViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 private val weekDays = listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo")
 private val mealTimes = listOf("Almuerzo", "Comida", "Cena")
@@ -74,10 +75,15 @@ fun PlannerScreen(navController: NavHostController,
     var selectedDay by remember { mutableStateOf<String?>(null) }
     var selectedMealTime by remember { mutableStateOf<String?>(null) }
     var commentSlot by remember { mutableStateOf<MealPlanSlot?>(null) }
+    val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
 
-    LaunchedEffect(Unit) {
-        plannerViewModel.observePlanner()
-        favoriteViewModel.observeFavorites()
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            plannerViewModel.observePlanner()
+            favoriteViewModel.observeFavorites()
+        } else {
+            navController.navigate("LoginScreen")
+        }
     }
 
     Column(

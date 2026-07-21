@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LockReset
@@ -62,6 +63,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.ui.components.AppBackButton
+import com.example.proyeto2.ui.components.AppConfirmDialog
 import com.example.proyeto2.ui.components.AppPrimaryButton
 import com.example.proyeto2.ui.components.AppScreenTitle
 import com.example.proyeto2.ui.components.AppTextFieldColors
@@ -71,6 +73,7 @@ import com.example.proyeto2.ui.theme.RecipeForest
 import com.example.proyeto2.ui.theme.RecipeInk
 import com.example.proyeto2.ui.theme.RecipeMuted
 import com.example.proyeto2.viewmodel.AuthViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ProfileScreen(
@@ -80,9 +83,14 @@ fun ProfileScreen(
     val uiState = authViewModel.uiState
     val user = uiState.user
     var name by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
     var selectedPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var showPasswordEditor by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    val auth = FirebaseAuth.getInstance()
+    val hasSession = auth.currentUser != null
 
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -91,7 +99,11 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(Unit) {
-        authViewModel.loadCurrentUser()
+        if (hasSession) {
+            authViewModel.loadCurrentUser()
+        } else {
+            navController.navigate("LoginScreen")
+        }
     }
 
     LaunchedEffect(user?.uid, user?.name) {
@@ -103,6 +115,12 @@ fun ProfileScreen(
     LaunchedEffect(uiState.successMessage) {
         if (uiState.successMessage?.contains("Perfil actualizado", ignoreCase = true) == true) {
             selectedPhotoUri = null
+        }
+        if (uiState.successMessage?.contains("Contrasena actualizada", ignoreCase = true) == true) {
+            currentPassword = ""
+            newPassword = ""
+            repeatPassword = ""
+            showPasswordEditor = false
         }
     }
 
@@ -183,34 +201,6 @@ fun ProfileScreen(
                                 colors = AppTextFieldColors()
                             )
 
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            OutlinedTextField(
-                                value = password,
-                                onValueChange = { password = it },
-                                label = { Text("Nueva contrasena") },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                visualTransformation = PasswordVisualTransformation(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                                singleLine = true,
-                                colors = AppTextFieldColors()
-                            )
-
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            OutlinedTextField(
-                                value = repeatPassword,
-                                onValueChange = { repeatPassword = it },
-                                label = { Text("Confirmar contrasena") },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                visualTransformation = PasswordVisualTransformation(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                                singleLine = true,
-                                colors = AppTextFieldColors()
-                            )
-
                             uiState.errorMessage?.let {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
@@ -235,12 +225,8 @@ fun ProfileScreen(
                                 onClick = {
                                     authViewModel.updateProfile(
                                         name = name,
-                                        password = password,
-                                        repeatPassword = repeatPassword,
                                         photoUri = selectedPhotoUri
                                     )
-                                    password = ""
-                                    repeatPassword = ""
                                 },
                                 enabled = !uiState.isLoading,
                                 modifier = Modifier.fillMaxWidth()
@@ -252,7 +238,21 @@ fun ProfileScreen(
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            OutlinedButton(
+                                onClick = { showPasswordEditor = !showPasswordEditor },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = RecipeForest),
+                                border = BorderStroke(1.dp, RecipeForest)
+                            ) {
+                                Icon(Icons.Filled.LockReset, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Actualizar contrasena", fontWeight = FontWeight.Bold)
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             TextButton(
                                 onClick = { authViewModel.sendPasswordReset(user?.email.orEmpty()) },
@@ -262,12 +262,172 @@ fun ProfileScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Enviar link para recuperar cuenta")
                             }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedButton(
+                                onClick = { showLogoutDialog = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Cerrar sesion", fontWeight = FontWeight.Bold)
+                            }
                         }
+                    }
+
+                    if (showPasswordEditor) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        PasswordUpdateCard(
+                            currentPassword = currentPassword,
+                            newPassword = newPassword,
+                            repeatPassword = repeatPassword,
+                            isLoading = uiState.isLoading,
+                            onCurrentPasswordChange = { currentPassword = it },
+                            onNewPasswordChange = { newPassword = it },
+                            onRepeatPasswordChange = { repeatPassword = it },
+                            onCancel = {
+                                currentPassword = ""
+                                newPassword = ""
+                                repeatPassword = ""
+                                showPasswordEditor = false
+                            },
+                            onSave = {
+                                authViewModel.updatePassword(
+                                    currentPassword = currentPassword,
+                                    newPassword = newPassword,
+                                    repeatPassword = repeatPassword
+                                )
+                            }
+                        )
                     }
                 }
             }
         }
     }
+
+    AppConfirmDialog(
+        visible = showLogoutDialog,
+        title = "Cerrar sesion",
+        message = "Estas seguro de que deseas cerrar tu sesion?",
+        confirmText = "Cerrar sesion",
+        dismissText = "Cancelar",
+        onConfirm = {
+            showLogoutDialog = false
+            auth.signOut()
+            navController.navigate("HomeScreen") {
+                popUpTo("HomeScreen") { inclusive = false }
+                launchSingleTop = true
+            }
+        },
+        onDismiss = { showLogoutDialog = false }
+    )
+}
+
+@Composable
+private fun PasswordUpdateCard(
+    currentPassword: String,
+    newPassword: String,
+    repeatPassword: String,
+    isLoading: Boolean,
+    onCurrentPasswordChange: (String) -> Unit,
+    onNewPasswordChange: (String) -> Unit,
+    onRepeatPasswordChange: (String) -> Unit,
+    onCancel: () -> Unit,
+    onSave: () -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 520.dp),
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(22.dp)
+        ) {
+            Text(
+                text = "Actualizar contrasena",
+                color = RecipeInk,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Black
+            )
+            Text(
+                text = "Confirma tu contrasena actual para proteger tu cuenta.",
+                color = RecipeMuted,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            PasswordField(
+                value = currentPassword,
+                onValueChange = onCurrentPasswordChange,
+                label = "Contrasena actual"
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            PasswordField(
+                value = newPassword,
+                onValueChange = onNewPasswordChange,
+                label = "Nueva contrasena"
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            PasswordField(
+                value = repeatPassword,
+                onValueChange = onRepeatPasswordChange,
+                label = "Confirmar nueva contrasena"
+            )
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            AppPrimaryButton(
+                onClick = onSave,
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = RecipeCream)
+                } else {
+                    Text("Guardar nueva contrasena", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            TextButton(
+                onClick = onCancel,
+                enabled = !isLoading,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text("Cancelar")
+            }
+        }
+    }
+}
+
+@Composable
+private fun PasswordField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        singleLine = true,
+        colors = AppTextFieldColors()
+    )
 }
 
 @Composable

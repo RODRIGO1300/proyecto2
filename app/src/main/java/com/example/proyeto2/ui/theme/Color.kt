@@ -63,6 +63,10 @@ val ProfileGradient = Brush.linearGradient(
     listOf(RecipeGrape, RecipeSky, RecipeOcean)
 )
 
+val ApiCreditsGradient = Brush.linearGradient(
+    listOf(RecipeInk, RecipeGrape, RecipeBerry, RecipeHoney)
+)
+
 val Purple80 = RecipeSurface
 val PurpleGrey80 = RecipeLeaf
 val Pink80 = RecipeCoral

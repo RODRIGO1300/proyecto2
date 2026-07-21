@@ -1,5 +1,6 @@
 package com.example.proyeto2.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.proyeto2.R
+import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.components.AppFormCard
 import com.example.proyeto2.ui.components.AppPrimaryButton
 import com.example.proyeto2.ui.components.AppTextFieldColors
@@ -60,7 +68,8 @@ fun LoginScreen(
             failedLoginAttempts = 0
             waitingForLoginResult = false
             navHostController.navigate("HomeScreen") {
-                popUpTo("LoginScreen") { inclusive = true }
+                popUpTo("HomeScreen") { inclusive = false }
+                launchSingleTop = true
             }
         }
     }
@@ -84,12 +93,31 @@ fun LoginScreen(
         ) {
             Column(
                 modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 18.dp)
+            ) {
+                AppBackButton(navController = navHostController)
+            }
+
+            Column(
+                modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 AppFormCard {
+                        Image(
+                            painter = painterResource(id = R.drawable.logo),
+                            contentDescription = "Logo RecipeBook",
+                            modifier = Modifier
+                                .size(104.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         Text(
                             text = "LOGIN",
                             fontSize = 46.sp,

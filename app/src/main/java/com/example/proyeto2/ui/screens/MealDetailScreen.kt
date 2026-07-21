@@ -49,6 +49,7 @@ import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.theme.GradientTierra
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MealDetailScreen(
@@ -59,10 +60,13 @@ fun MealDetailScreen(
 ) {
     val uiState = mealViewModel.uiState
     val favoriteState = favoriteViewModel.uiState
+    val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
 
-    LaunchedEffect(mealId) {
+    LaunchedEffect(mealId, isLoggedIn) {
         mealViewModel.loadMealDetail(mealId)
-        favoriteViewModel.observeFavorites()
+        if (isLoggedIn) {
+            favoriteViewModel.observeFavorites()
+        }
     }
 
     Column(
@@ -101,7 +105,13 @@ fun MealDetailScreen(
                     isFavorite = favoriteViewModel.isFavorite(uiState.selectedMeal.idMeal),
                     favoriteMessage = favoriteState.successMessage ?: favoriteState.errorMessage,
                     isFavoriteError = favoriteState.errorMessage != null,
-                    onFavoriteClick = { favoriteViewModel.toggleFavorite(uiState.selectedMeal) }
+                    onFavoriteClick = {
+                        if (isLoggedIn) {
+                            favoriteViewModel.toggleFavorite(uiState.selectedMeal)
+                        } else {
+                            navController.navigate("LoginScreen")
+                        }
+                    }
                 )
             }
         }

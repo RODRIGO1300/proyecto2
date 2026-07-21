@@ -18,14 +18,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,11 +69,13 @@ fun AppBackButton(
     text: String = "Volver"
 ) {
     val context = LocalContext.current
+    var showExitDialog by remember { mutableStateOf(false) }
+
     OutlinedButton(
         onClick = {
             val didPop = navController.popBackStack()
             if (!didPop) {
-                (context as? Activity)?.finish()
+                showExitDialog = true
             }
         },
         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
@@ -77,6 +85,19 @@ fun AppBackButton(
         Spacer(modifier = Modifier.width(8.dp))
         Text(text)
     }
+
+    AppConfirmDialog(
+        visible = showExitDialog,
+        title = "Salir de la app",
+        message = "Estas seguro de que deseas salir de RecipeBook?",
+        confirmText = "Salir",
+        dismissText = "Cancelar",
+        onConfirm = {
+            showExitDialog = false
+            (context as? Activity)?.finish()
+        },
+        onDismiss = { showExitDialog = false }
+    )
 }
 
 @Composable
@@ -152,4 +173,33 @@ fun AppScreenTitle(
             fontWeight = FontWeight.SemiBold
         )
     }
+}
+
+@Composable
+fun AppConfirmDialog(
+    visible: Boolean,
+    title: String,
+    message: String,
+    confirmText: String,
+    dismissText: String = "Cancelar",
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (!visible) return
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title, fontWeight = FontWeight.Black) },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(confirmText, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(dismissText)
+            }
+        }
+    )
 }

@@ -51,6 +51,7 @@ import com.example.proyeto2.ui.theme.RecipeCream
 import com.example.proyeto2.ui.theme.RecipeInk
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ExploreMealsScreen(
@@ -61,9 +62,12 @@ fun ExploreMealsScreen(
     val uiState = mealViewModel.uiState
     val favoriteState = favoriteViewModel.uiState
     val letters = ('A'..'Z').toList()
+    val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
 
-    LaunchedEffect(Unit) {
-        favoriteViewModel.observeFavorites()
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            favoriteViewModel.observeFavorites()
+        }
     }
 
     Column(
@@ -162,7 +166,11 @@ fun ExploreMealsScreen(
                                 }
                             },
                             onFavoriteClick = {
-                                favoriteViewModel.toggleFavorite(meal)
+                                if (isLoggedIn) {
+                                    favoriteViewModel.toggleFavorite(meal)
+                                } else {
+                                    navController.navigate("LoginScreen")
+                                }
                             }
                         )
                     }

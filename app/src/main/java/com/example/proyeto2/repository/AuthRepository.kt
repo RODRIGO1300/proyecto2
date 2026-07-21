@@ -3,6 +3,7 @@ package com.example.proyeto2.repository
 import android.net.Uri
 import com.example.proyeto2.models.user.AuthResult
 import com.example.proyeto2.models.user.AuthUser
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
@@ -118,7 +119,6 @@ class AuthRepository(
 
     fun updateProfile(
         name: String,
-        newPassword: String?,
         photoUri: Uri?,
         onResult: (AuthResult) -> Unit
     ) {
@@ -147,25 +147,7 @@ class AuthRepository(
                             onResult(AuthResult.Error(saveError))
                             return@saveUserProfile
                         }
-
-                        if (newPassword.isNullOrBlank()) {
-                            onResult(AuthResult.Success(updatedUser))
-                            return@saveUserProfile
-                        }
-
-                        user.updatePassword(newPassword)
-                            .addOnCompleteListener { passwordTask ->
-                                if (passwordTask.isSuccessful) {
-                                    onResult(AuthResult.Success(updatedUser))
-                                } else {
-                                    onResult(
-                                        AuthResult.Error(
-                                            passwordTask.exception?.message
-                                                ?: "Perfil actualizado, pero no se pudo cambiar la contrasena."
-                                        )
-                                    )
-                                }
-                            }
+                        onResult(AuthResult.Success(updatedUser))
                     }
                 }
         }
@@ -175,7 +157,7 @@ class AuthRepository(
             return
         }
 
-        val photoRef = storage.reference.child("profile_photos/${user.uid}.jpg")
+        val photoRef = storage.reference.child("profile_photos/${user.uid}/${System.currentTimeMillis()}.jpg")
         photoRef.putFile(photoUri)
             .addOnSuccessListener {
                 photoRef.downloadUrl
@@ -185,7 +167,7 @@ class AuthRepository(
                     .addOnFailureListener { exception ->
                         onResult(
                             AuthResult.Error(
-                                exception.message ?: "La foto se subio, pero no se pudo obtener su enlace."
+                                exception.message ?: "La foto se subio, pero Firebase Storage no entrego el enlace."
                             )
                         )
                     }
@@ -196,6 +178,47 @@ class AuthRepository(
                         exception.message ?: "No se pudo subir la foto de perfil."
                     )
                 )
+            }
+    }
+
+    fun updatePassword(
+        currentPassword: String,
+        newPassword: String,
+        onResult: (AuthResult) -> Unit
+    ) {
+        val user = auth.currentUser
+        val email = user?.email
+        if (user == null || email.isNullOrBlank()) {
+            onResult(AuthResult.Error("No hay usuario autenticado para cambiar la contrasena."))
+            return
+        }
+
+        val credential = EmailAuthProvider.getCredential(email, currentPassword)
+        user.reauthenticate(credential)
+            .addOnCompleteListener { reauthTask ->
+                if (!reauthTask.isSuccessful) {
+                    onResult(
+                        AuthResult.Error(
+                            reauthTask.exception?.message
+                                ?: "La contrasena actual no es correcta."
+                        )
+                    )
+                    return@addOnCompleteListener
+                }
+
+                user.updatePassword(newPassword)
+                    .addOnCompleteListener { passwordTask ->
+                        if (passwordTask.isSuccessful) {
+                            onResult(AuthResult.Success(user.toAuthUser()))
+                        } else {
+                            onResult(
+                                AuthResult.Error(
+                                    passwordTask.exception?.message
+                                        ?: "No se pudo actualizar la contrasena."
+                                )
+                            )
+                        }
+                    }
             }
     }
 
