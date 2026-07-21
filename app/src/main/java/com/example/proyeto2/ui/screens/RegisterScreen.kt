@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.components.AppFormCard
 import com.example.proyeto2.ui.components.AppPrimaryButton
 import com.example.proyeto2.ui.components.AppTextFieldColors
@@ -63,6 +64,14 @@ fun RegisterScreen(
                 .padding(horizontal = 24.dp),
             contentAlignment = Alignment.Center
         ) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 18.dp)
+            ) {
+                AppBackButton(navController = navHostController)
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
