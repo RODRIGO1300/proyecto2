@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,7 +28,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +44,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.models.meal.Meal
+import com.example.proyeto2.ui.components.AppBackButton
+import com.example.proyeto2.ui.components.AppScreenTitle
 import com.example.proyeto2.ui.theme.GradientClaroOscuro
+import com.example.proyeto2.ui.theme.RecipeCream
+import com.example.proyeto2.ui.theme.RecipeInk
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
 
@@ -75,28 +77,14 @@ fun ExploreMealsScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedButton(
-                onClick = { navController.popBackStack() },
-                colors = ButtonDefaults.buttonColors(Color.Red)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Volver", color = Color.Black)
-            }
+            AppBackButton(navController = navController)
         }
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        Text(
-            text = "Explorar recetas",
-            color = Color.White,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Black
-        )
-        Text(
-            text = "Filtro por primera letra",
-            color = Color.White.copy(alpha = 0.86f),
-            fontWeight = FontWeight.SemiBold
+        AppScreenTitle(
+            title = "Explorar recetas",
+            subtitle = "Filtro por primera letra"
         )
         favoriteState.successMessage?.let {
             Text(text = it, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
@@ -121,12 +109,12 @@ fun ExploreMealsScreen(
                         containerColor = if (uiState.selectedLetter.equals(letter.toString(), ignoreCase = true)) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            Color.White.copy(alpha = 0.92f)
+                            RecipeCream.copy(alpha = 0.92f)
                         },
                         contentColor = if (uiState.selectedLetter.equals(letter.toString(), ignoreCase = true)) {
-                            Color.White
+                            RecipeCream
                         } else {
-                            Color.Black
+                            RecipeInk
                         }
                     )
                 ) {

@@ -1,7 +1,9 @@
 package com.example.proyeto2.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +46,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.ui.theme.GradientOtono
+import com.example.proyeto2.ui.theme.RecipeCream
+import com.example.proyeto2.ui.theme.RecipeForest
+import com.example.proyeto2.ui.theme.RecipeInk
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -118,9 +123,9 @@ fun HomeScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(Color.Red)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                 ) {
-                    Text(text = "Cerrar sesion", fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(text = "Cerrar sesion", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -151,13 +156,14 @@ private fun ProfileHeader(
                     modifier = Modifier
                         .size(58.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(RecipeForest)
+                        .border(BorderStroke(2.dp, RecipeCream), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Person,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = RecipeCream,
                         modifier = Modifier.size(34.dp)
                     )
                 }
@@ -167,7 +173,8 @@ private fun ProfileHeader(
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(58.dp)
-                        .clip(CircleShape),
+                        .clip(CircleShape)
+                        .border(BorderStroke(2.dp, RecipeCream), CircleShape),
                     contentScale = ContentScale.Crop
                 )
             }
@@ -175,15 +182,15 @@ private fun ProfileHeader(
             Spacer(modifier = Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = name, fontSize = 20.sp, fontWeight = FontWeight.Black)
+                Text(text = name, fontSize = 20.sp, fontWeight = FontWeight.Black, color = RecipeInk)
                 Text(
                     text = if (isEmailVerified) "Perfil verificado" else "Perfil sin verificar",
-                    color = if (isEmailVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    color = if (isEmailVerified) RecipeForest else MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
-            Text(text = "Editar", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text(text = "Editar", fontWeight = FontWeight.Bold, color = RecipeForest)
         }
     }
 }

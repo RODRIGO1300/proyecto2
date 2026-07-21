@@ -11,16 +11,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -40,7 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.proyeto2.ui.components.AppFormCard
+import com.example.proyeto2.ui.components.AppPrimaryButton
+import com.example.proyeto2.ui.components.AppTextFieldColors
 import com.example.proyeto2.ui.theme.GradientVital
+import com.example.proyeto2.ui.theme.RecipeInk
 import com.example.proyeto2.viewmodel.AuthViewModel
 
 @Composable
@@ -70,27 +70,13 @@ fun RegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 430.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    color = Color.White.copy(alpha = 0.92f),
-                    tonalElevation = 6.dp,
-                    shadowElevation = 8.dp
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(28.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                AppFormCard {
                         Text(
                             text = "REGISTRO",
                             fontSize = 46.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Cursive,
-                            color = Color.Black
+                            color = RecipeInk
                         )
 
                         Spacer(modifier = Modifier.height(34.dp))
@@ -102,14 +88,7 @@ fun RegisterScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black,
-                                focusedLabelColor = Color.Black,
-                                unfocusedLabelColor = Color.Black,
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray
-                            )
+                            colors = AppTextFieldColors()
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -122,14 +101,7 @@ fun RegisterScreen(
                             shape = RoundedCornerShape(12.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                             singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black,
-                                focusedLabelColor = Color.Black,
-                                unfocusedLabelColor = Color.Black,
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray
-                            )
+                            colors = AppTextFieldColors()
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -143,14 +115,7 @@ fun RegisterScreen(
                             visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black,
-                                focusedLabelColor = Color.Black,
-                                unfocusedLabelColor = Color.Black,
-                                focusedBorderColor = Color.Black,
-                                unfocusedBorderColor = Color.Gray
-                            )
+                            colors = AppTextFieldColors()
                         )
 
                         uiState.errorMessage?.let { message ->
@@ -188,7 +153,7 @@ fun RegisterScreen(
 
                         Spacer(modifier = Modifier.height(30.dp))
 
-                        Button(
+                        AppPrimaryButton(
                             onClick = {
                                 authViewModel.register(
                                     name = usuario,
@@ -199,8 +164,7 @@ fun RegisterScreen(
                             enabled = !uiState.isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp),
-                            shape = RoundedCornerShape(12.dp)
+                                .height(56.dp)
                         ) {
                             if (uiState.isLoading) {
                                 CircularProgressIndicator()
@@ -222,7 +186,6 @@ fun RegisterScreen(
                         ) {
                             Text("Iniciar sesion")
                         }
-                    }
                 }
             }
         }

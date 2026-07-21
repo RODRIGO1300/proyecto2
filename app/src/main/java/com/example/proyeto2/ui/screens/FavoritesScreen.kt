@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -29,7 +28,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,6 +50,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.models.favorite.FavoriteMeal
+import com.example.proyeto2.ui.components.AppBackButton
+import com.example.proyeto2.ui.components.AppScreenTitle
 import com.example.proyeto2.ui.theme.GradientAurora
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import java.text.SimpleDateFormat
@@ -81,28 +81,14 @@ fun FavoritesScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedButton(
-                onClick = { navController.popBackStack() },
-                colors = ButtonDefaults.buttonColors(Color.Red)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Volver", color = Color.Black)
-            }
+            AppBackButton(navController = navController)
         }
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        Text(
-            text = "Favoritos",
-            color = Color.White,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Black
-        )
-        Text(
-            text = "Recetas guardadas por tu usuario",
-            color = Color.White.copy(alpha = 0.86f),
-            fontWeight = FontWeight.SemiBold
+        AppScreenTitle(
+            title = "Favoritos",
+            subtitle = "Recetas guardadas por tu usuario"
         )
 
         Spacer(modifier = Modifier.height(16.dp))

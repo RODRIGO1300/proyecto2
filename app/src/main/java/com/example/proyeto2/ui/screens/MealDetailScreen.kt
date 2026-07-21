@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,7 +26,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +45,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.proyeto2.R
 import com.example.proyeto2.models.meal.Meal
 import com.example.proyeto2.models.meal.ingredientMeasures
+import com.example.proyeto2.ui.components.AppBackButton
 import com.example.proyeto2.ui.theme.GradientTierra
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.MealViewModel
@@ -73,14 +72,7 @@ fun MealDetailScreen(
             .safeDrawingPadding()
             .padding(18.dp)
     ) {
-        OutlinedButton(
-            onClick = { navController.popBackStack() },
-            colors = ButtonDefaults.buttonColors(Color.Red)
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Volver", color = Color.Black)
-        }
+        AppBackButton(navController = navController)
 
         Spacer(modifier = Modifier.height(14.dp))
 

@@ -1,5 +1,6 @@
 package com.example.proyeto2.viewmodel
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -152,7 +153,7 @@ class AuthViewModel(
         uiState = uiState.copy(errorMessage = null, successMessage = null)
     }
 
-    fun updateProfile(name: String, password: String, repeatPassword: String) {
+    fun updateProfile(name: String, password: String, repeatPassword: String, photoUri: Uri? = null) {
         val cleanName = name.trim()
         val cleanPassword = password.trim()
         val cleanRepeatPassword = repeatPassword.trim()
@@ -177,7 +178,8 @@ class AuthViewModel(
         uiState = uiState.copy(isLoading = true, errorMessage = null, successMessage = null)
         repository.updateProfile(
             name = cleanName,
-            newPassword = cleanPassword.ifBlank { null }
+            newPassword = cleanPassword.ifBlank { null },
+            photoUri = photoUri
         ) { result ->
             uiState = when (result) {
                 is AuthResult.Success -> uiState.copy(
@@ -197,6 +199,46 @@ class AuthViewModel(
                     isLoading = false,
                     errorMessage = "Actualizacion cancelada.",
                     successMessage = null
+                )
+            }
+        }
+    }
+
+    fun sendPasswordReset(email: String) {
+        val cleanEmail = email.trim()
+        if (cleanEmail.isBlank()) {
+            uiState = uiState.copy(errorMessage = "Ingresa tu correo para enviar el link.")
+            return
+        }
+
+        uiState = uiState.copy(
+            isLoading = true,
+            errorMessage = null,
+            successMessage = null,
+            isPasswordResetSent = false
+        )
+
+        repository.sendPasswordResetEmail(cleanEmail) { result ->
+            uiState = when (result) {
+                is AuthResult.Success -> uiState.copy(
+                    isLoading = false,
+                    successMessage = "Te enviamos un link para recuperar la cuenta y cambiar la contrasena.",
+                    errorMessage = null,
+                    isPasswordResetSent = true
+                )
+
+                is AuthResult.Error -> uiState.copy(
+                    isLoading = false,
+                    errorMessage = result.message,
+                    successMessage = null,
+                    isPasswordResetSent = false
+                )
+
+                AuthResult.Cancelled -> uiState.copy(
+                    isLoading = false,
+                    errorMessage = "Recuperacion cancelada.",
+                    successMessage = null,
+                    isPasswordResetSent = false
                 )
             }
         }
