@@ -109,13 +109,10 @@ fun PlannerScreen(navController: NavHostController,
 
         Button(
             onClick = {
-                val contenido = buildPlannerReport(plannerState.slots)
-                PdfUtils.crearYGuardarPdfEnDescargas(
+                PdfUtils.crearReportePlaneadorSemanal(
                     context = context,
                     nombreArchivo = "Plan_Semanal_De_Comidas",
-                    titulo = "Plan semanal de comidas",
-                    subtitulo = "Recetario",
-                    contenido = contenido
+                    slots = plannerState.slots
                 )
             },
             modifier = Modifier.fillMaxWidth(),
@@ -371,16 +368,4 @@ private fun PlannerCommentDialog(
             }
         }
     )
-}
-
-private fun buildPlannerReport(slots: List<MealPlanSlot>): String {
-    return weekDays.joinToString("\n\n") { day ->
-        val rows = mealTimes.joinToString("\n") { mealTime ->
-            val slot = slots.firstOrNull { it.dia == day && it.tiempo == mealTime }
-            val dish = slot?.nombre?.ifBlank { "Sin asignar" } ?: "Sin asignar"
-            val comments = slot?.comentarios?.takeIf { it.isNotBlank() }?.let { " | Comentarios: $it" }.orEmpty()
-            "$mealTime: $dish$comments"
-        }
-        "$day\n$rows"
-    }
 }
