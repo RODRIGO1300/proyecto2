@@ -1,7 +1,7 @@
 package com.example.proyeto2.ui.screens
 
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,15 +38,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.example.proyeto2.R
 import com.example.proyeto2.models.meal.Meal
 import com.example.proyeto2.models.meal.ingredientMeasures
 import com.example.proyeto2.ui.components.AppBackButton
@@ -131,6 +129,7 @@ private fun MealDetailContent(
     isFavoriteError: Boolean,
     onFavoriteClick: () -> Unit
 ) {
+    val context = LocalContext.current
     var translatedIngredients by remember(meal.idMeal) { mutableStateOf<String?>(null) }
     var translatedInstructions by remember(meal.idMeal) { mutableStateOf<String?>(null) }
     var isTranslatingIngredients by remember(meal.idMeal) { mutableStateOf(false) }
@@ -284,37 +283,23 @@ private fun MealDetailContent(
 
         item {
             DetailSection(title = "Tutorial") {
-                val embedUrl = meal.youtubeUrl.toYouTubeEmbedUrl()
-                if (embedUrl == null) {
-                    Image(
-                        painter = painterResource(id = R.drawable.nodisponible),
-                        contentDescription = "Tutorial no disponible",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
+                val tutorialUrl = meal.youtubeUrl?.trim().orEmpty()
+                if (tutorialUrl.isBlank()) {
+                    Text(
+                        text = "Tutorial no Disponible",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold
                     )
                 } else {
-                    AndroidView(
-                        factory = { context ->
-                            WebView(context).apply {
-                                webViewClient = WebViewClient()
-                                settings.javaScriptEnabled = true
-                                settings.domStorageEnabled = true
-                                loadUrl(embedUrl)
-                            }
+                    Button(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(tutorialUrl))
+                            runCatching { context.startActivity(intent) }
                         },
-                        update = { webView ->
-                            if (webView.url != embedUrl) {
-                                webView.loadUrl(embedUrl)
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                            .clip(RoundedCornerShape(12.dp))
-                    )
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text("Ver tutorial en YouTube", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -368,18 +353,4 @@ private fun DetailSection(
             content()
         }
     }
-}
-
-private fun String?.toYouTubeEmbedUrl(): String? {
-    val url = this?.trim().orEmpty()
-    if (url.isBlank()) return null
-
-    val videoId = when {
-        "watch?v=" in url -> url.substringAfter("watch?v=").substringBefore("&")
-        "youtu.be/" in url -> url.substringAfter("youtu.be/").substringBefore("?")
-        "embed/" in url -> url.substringAfter("embed/").substringBefore("?")
-        else -> null
-    }
-
-    return videoId?.takeIf { it.isNotBlank() }?.let { "https://www.youtube.com/embed/$it" }
 }
