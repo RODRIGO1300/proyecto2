@@ -1,0 +1,37 @@
+[debug] [2026-07-21T02:44:37.882Z] ----------------------------------------------------------------------
+[debug] [2026-07-21T02:44:37.886Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\omen\AppData\Local\npm-cache\_npx\ba4f1959e38407b5\node_modules\firebase-tools\lib\bin\firebase.js firestore:databases:list
+[debug] [2026-07-21T02:44:37.886Z] CLI Version:   15.24.0
+[debug] [2026-07-21T02:44:37.886Z] Platform:      win32
+[debug] [2026-07-21T02:44:37.887Z] Node Version:  v24.11.1
+[debug] [2026-07-21T02:44:37.887Z] Detected Agent: codex_cli
+[debug] [2026-07-21T02:44:37.887Z] Time:          Mon Jul 20 2026 20:44:37 GMT-0600 (hora estándar central)
+[debug] [2026-07-21T02:44:37.888Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-07-21T02:44:37.902Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-07-21T02:44:41.205Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-21T02:44:41.205Z] > authorizing via signed-in user (fixer130404@gmail.com)
+[debug] [2026-07-21T02:44:41.205Z] [iam] checking project example-c0caf for permissions ["datastore.databases.list","firebase.projects.get"]
+[debug] [2026-07-21T02:44:41.207Z] Checked if tokens are valid: false, expires at: 1784059175336
+[debug] [2026-07-21T02:44:41.207Z] Checked if tokens are valid: false, expires at: 1784059175336
+[debug] [2026-07-21T02:44:41.208Z] > refreshing access token with scopes: []
+[debug] [2026-07-21T02:44:41.210Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-21T02:44:41.210Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-21T02:44:41.354Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-07-21T02:44:41.354Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-07-21T02:44:41.369Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-21T02:44:41.370Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-21T02:44:41.385Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/example-c0caf:testIamPermissions [none]
+[debug] [2026-07-21T02:44:41.385Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/example-c0caf:testIamPermissions  x-goog-user-project=example-c0caf
+[debug] [2026-07-21T02:44:41.385Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/example-c0caf:testIamPermissions {"permissions":["datastore.databases.list","firebase.projects.get"]}
+[debug] [2026-07-21T02:44:41.706Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/example-c0caf:testIamPermissions 200
+[debug] [2026-07-21T02:44:41.706Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/example-c0caf:testIamPermissions {"permissions":["datastore.databases.list","firebase.projects.get"]}
+[debug] [2026-07-21T02:44:41.707Z] Checked if tokens are valid: true, expires at: 1784605480370
+[debug] [2026-07-21T02:44:41.707Z] Checked if tokens are valid: true, expires at: 1784605480370
+[debug] [2026-07-21T02:44:41.707Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/example-c0caf/databases [none]
+[debug] [2026-07-21T02:44:42.302Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/example-c0caf/databases 200
+[debug] [2026-07-21T02:44:42.303Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/example-c0caf/databases {"databases":[{"name":"projects/example-c0caf/databases/(default)","uid":"3d929bfe-c070-456f-b0eb-93172f70d5d8","createTime":"2026-07-14T19:44:18.108354Z","updateTime":"2026-07-14T19:44:18.108354Z","locationId":"nam7","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-07-21T01:44:43.901106Z","appEngineIntegrationMode":"DISABLED","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IJiR4Yrg4pUDMIqPi/j20pUD"}]}
+[info] ┌───────────────────────────────────────────────┬────────────────────┬────────────────────┐
+│ Database Name                                 │ Edition            │ Type               │
+├───────────────────────────────────────────────┼────────────────────┼────────────────────┤
+│ projects/example-c0caf/databases/(default)    │ STANDARD           │ FIRESTORE_NATIVE   │
+└───────────────────────────────────────────────┴────────────────────┴────────────────────┘
