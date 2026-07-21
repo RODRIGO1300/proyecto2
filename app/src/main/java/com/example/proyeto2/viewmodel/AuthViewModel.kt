@@ -1,6 +1,5 @@
 package com.example.proyeto2.viewmodel
 
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -153,18 +152,27 @@ class AuthViewModel(
         uiState = uiState.copy(errorMessage = null, successMessage = null)
     }
 
-    fun updateProfile(name: String, photoUri: Uri? = null) {
+    fun updateProfile(name: String, photoUrl: String = "") {
         val cleanName = name.trim()
+        val cleanPhotoUrl = photoUrl.trim()
 
         if (cleanName.isBlank()) {
             uiState = uiState.copy(errorMessage = "Ingresa tu nombre.")
             return
         }
 
+        if (cleanPhotoUrl.isNotBlank() &&
+            !cleanPhotoUrl.startsWith("http://", ignoreCase = true) &&
+            !cleanPhotoUrl.startsWith("https://", ignoreCase = true)
+        ) {
+            uiState = uiState.copy(errorMessage = "La URL de la foto debe iniciar con http:// o https://.")
+            return
+        }
+
         uiState = uiState.copy(isLoading = true, errorMessage = null, successMessage = null)
         repository.updateProfile(
             name = cleanName,
-            photoUri = photoUri
+            photoUrl = cleanPhotoUrl
         ) { result ->
             uiState = when (result) {
                 is AuthResult.Success -> uiState.copy(

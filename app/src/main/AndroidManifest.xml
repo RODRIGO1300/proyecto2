@@ -5,12 +5,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Lectura de imagenes para seleccionar foto de perfil segun version de Android. -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
     <!-- Necesario solo para guardar archivos en Descargas en Android 9 o menor. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"

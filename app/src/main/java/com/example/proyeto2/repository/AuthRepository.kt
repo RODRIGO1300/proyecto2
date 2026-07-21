@@ -8,12 +8,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.storage.FirebaseStorage
 
 class AuthRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
     fun registerWithEmailVerification(
         name: String,
@@ -119,7 +117,7 @@ class AuthRepository(
 
     fun updateProfile(
         name: String,
-        photoUri: Uri?,
+        photoUrl: String?,
         onResult: (AuthResult) -> Unit
     ) {
         val user = auth.currentUser
@@ -128,10 +126,13 @@ class AuthRepository(
             return
         }
 
-        fun updateAuthProfile(photoUrl: Uri?) {
+        val cleanPhotoUrl = photoUrl?.trim().orEmpty()
+        val photoUri = cleanPhotoUrl.takeIf { it.isNotBlank() }?.let { Uri.parse(it) }
+
+        fun updateAuthProfile() {
             val profileUpdates = UserProfileChangeRequest.Builder()
                 .setDisplayName(name)
-                .setPhotoUri(photoUrl ?: user.photoUrl)
+                .setPhotoUri(photoUri)
                 .build()
 
             user.updateProfile(profileUpdates)
@@ -141,7 +142,7 @@ class AuthRepository(
                         return@addOnCompleteListener
                     }
 
-                    val updatedUser = user.toAuthUser(name, photoUrl?.toString() ?: user.photoUrl?.toString().orEmpty())
+                    val updatedUser = user.toAuthUser(name, cleanPhotoUrl)
                     saveUserProfile(updatedUser) { saveError ->
                         if (saveError != null) {
                             onResult(AuthResult.Error(saveError))
@@ -152,33 +153,7 @@ class AuthRepository(
                 }
         }
 
-        if (photoUri == null) {
-            updateAuthProfile(null)
-            return
-        }
-
-        val photoRef = storage.reference.child("profile_photos/${user.uid}/${System.currentTimeMillis()}.jpg")
-        photoRef.putFile(photoUri)
-            .addOnSuccessListener {
-                photoRef.downloadUrl
-                    .addOnSuccessListener { downloadUri ->
-                        updateAuthProfile(downloadUri)
-                    }
-                    .addOnFailureListener { exception ->
-                        onResult(
-                            AuthResult.Error(
-                                exception.message ?: "La foto se subio, pero Firebase Storage no entrego el enlace."
-                            )
-                        )
-                    }
-            }
-            .addOnFailureListener { exception ->
-                onResult(
-                    AuthResult.Error(
-                        exception.message ?: "No se pudo subir la foto de perfil."
-                    )
-                )
-            }
+        updateAuthProfile()
     }
 
     fun updatePassword(

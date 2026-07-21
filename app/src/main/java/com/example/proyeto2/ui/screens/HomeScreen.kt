@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
@@ -174,6 +175,22 @@ fun HomeScreen(navController: NavHostController) {
                     icon = Icons.Filled.Info,
                     onClick = { navController.navigate("ApiCreditsScreen") }
                 )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                OutlinedButton(
+                    onClick = { showExitDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.72f))
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("Salir de la app", fontWeight = FontWeight.Bold)
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
             }

@@ -1,8 +1,5 @@
 package com.example.proyeto2.ui.screens
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material.icons.filled.Person
@@ -86,17 +82,11 @@ fun ProfileScreen(
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
-    var selectedPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var photoUrl by remember { mutableStateOf("") }
     var showPasswordEditor by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
     val hasSession = auth.currentUser != null
-
-    val photoPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        selectedPhotoUri = uri
-    }
 
     LaunchedEffect(Unit) {
         if (hasSession) {
@@ -106,16 +96,14 @@ fun ProfileScreen(
         }
     }
 
-    LaunchedEffect(user?.uid, user?.name) {
+    LaunchedEffect(user?.uid, user?.name, user?.photoUrl) {
         if (!user?.name.isNullOrBlank()) {
             name = user?.name.orEmpty()
         }
+        photoUrl = user?.photoUrl.orEmpty()
     }
 
     LaunchedEffect(uiState.successMessage) {
-        if (uiState.successMessage?.contains("Perfil actualizado", ignoreCase = true) == true) {
-            selectedPhotoUri = null
-        }
         if (uiState.successMessage?.contains("Contrasena actualizada", ignoreCase = true) == true) {
             currentPassword = ""
             newPassword = ""
@@ -163,10 +151,7 @@ fun ProfileScreen(
                                 .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            ProfilePhotoPicker(
-                                photoModel = selectedPhotoUri ?: user?.photoUrl.orEmpty(),
-                                onSelectPhoto = { photoPicker.launch("image/*") }
-                            )
+                            ProfilePhotoPreview(photoUrl = photoUrl)
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -201,6 +186,18 @@ fun ProfileScreen(
                                 colors = AppTextFieldColors()
                             )
 
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            OutlinedTextField(
+                                value = photoUrl,
+                                onValueChange = { photoUrl = it },
+                                label = { Text("URL de foto de perfil") },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                colors = AppTextFieldColors()
+                            )
+
                             uiState.errorMessage?.let {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
@@ -225,7 +222,7 @@ fun ProfileScreen(
                                 onClick = {
                                     authViewModel.updateProfile(
                                         name = name,
-                                        photoUri = selectedPhotoUri
+                                        photoUrl = photoUrl
                                     )
                                 },
                                 enabled = !uiState.isLoading,
@@ -431,56 +428,35 @@ private fun PasswordField(
 }
 
 @Composable
-private fun ProfilePhotoPicker(
-    photoModel: Any,
-    onSelectPhoto: () -> Unit
+private fun ProfilePhotoPreview(
+    photoUrl: String
 ) {
-    Box(contentAlignment = Alignment.BottomEnd) {
-        if (photoModel.toString().isBlank()) {
-            Box(
-                modifier = Modifier
-                    .size(132.dp)
-                    .clip(CircleShape)
-                    .background(RecipeForest)
-                    .border(BorderStroke(4.dp, RecipeCream), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = null,
-                    tint = RecipeCream,
-                    modifier = Modifier.size(72.dp)
-                )
-            }
-        } else {
-            Image(
-                painter = rememberAsyncImagePainter(photoModel),
-                contentDescription = "Foto de perfil",
-                modifier = Modifier
-                    .size(132.dp)
-                    .clip(CircleShape)
-                    .border(BorderStroke(4.dp, RecipeCream), CircleShape),
-                contentScale = ContentScale.Crop
-            )
-        }
-
-        OutlinedButton(
-            onClick = onSelectPhoto,
-            modifier = Modifier.size(48.dp),
-            shape = CircleShape,
-            contentPadding = ButtonDefaults.ContentPadding,
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = RecipeCream,
-                contentColor = RecipeForest
-            ),
-            border = BorderStroke(1.dp, RecipeForest)
+    if (photoUrl.isBlank()) {
+        Box(
+            modifier = Modifier
+                .size(132.dp)
+                .clip(CircleShape)
+                .background(RecipeForest)
+                .border(BorderStroke(4.dp, RecipeCream), CircleShape),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Filled.CameraAlt,
-                contentDescription = "Cambiar foto",
-                modifier = Modifier.size(22.dp)
+                imageVector = Icons.Filled.Person,
+                contentDescription = null,
+                tint = RecipeCream,
+                modifier = Modifier.size(72.dp)
             )
         }
+    } else {
+        Image(
+            painter = rememberAsyncImagePainter(photoUrl),
+            contentDescription = "Foto de perfil",
+            modifier = Modifier
+                .size(132.dp)
+                .clip(CircleShape)
+                .border(BorderStroke(4.dp, RecipeCream), CircleShape),
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
