@@ -12,6 +12,7 @@ firebaseBom = "34.15.0"
 firebaseDataconnect = "17.3.2"
 appcompat = "1.7.1" #se agrega
 desugar_jdk_libs = "2.1.4"
+translate = "17.0.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +33,7 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 firebase-dataconnect = { group = "com.google.firebase", name = "firebase-dataconnect", version.ref = "firebaseDataconnect" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" } #se agrega
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+translate = { group = "com.google.mlkit", name = "translate", version.ref = "translate" }
 
 
 [plugins]

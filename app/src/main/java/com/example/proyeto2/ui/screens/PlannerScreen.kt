@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import com.example.proyeto2.utils.PdfUtils
 import com.example.proyeto2.viewmodel.FavoriteViewModel
 import com.example.proyeto2.viewmodel.PlannerViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 private val weekDays = listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo")
 private val mealTimes = listOf("Almuerzo", "Comida", "Cena")
@@ -71,6 +73,7 @@ fun PlannerScreen(navController: NavHostController,
     favoriteViewModel: FavoriteViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val plannerState = plannerViewModel.uiState
     val favoriteState = favoriteViewModel.uiState
     var selectedDay by remember { mutableStateOf<String?>(null) }
@@ -109,11 +112,13 @@ fun PlannerScreen(navController: NavHostController,
 
         Button(
             onClick = {
-                PdfUtils.crearReportePlaneadorSemanal(
-                    context = context,
-                    nombreArchivo = "Plan_Semanal_De_Comidas",
-                    slots = plannerState.slots
-                )
+                scope.launch {
+                    PdfUtils.crearReportePlaneadorSemanal(
+                        context = context,
+                        nombreArchivo = "Plan_Semanal_De_Comidas",
+                        slots = plannerState.slots
+                    )
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)

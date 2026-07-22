@@ -2,68 +2,101 @@ package com.example.proyeto2.utils
 
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
+import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.pdf.PdfDocument
 import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import com.example.proyeto2.R
 import com.example.proyeto2.models.planner.MealPlanSlot
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.OutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 object PdfUtils {
     private const val PAGE_WIDTH = 595
     private const val PAGE_HEIGHT = 842
     private const val MARGIN = 36f
-    private const val BRAND_GREEN = 0xFF2F6F4E.toInt()
-    private const val BRAND_LEAF = 0xFF76A96B.toInt()
-    private const val BRAND_CREAM = 0xFFFFF8ED.toInt()
-    private const val BRAND_INK = 0xFF17231F.toInt()
-    private const val BRAND_MUTED = 0xFF6E7C72.toInt()
-    private const val LIGHT_ROW = 0xFFF7EBDD.toInt()
+    private const val BRAND_BROWN = 0xFF543D31.toInt()
+    private const val BRAND_PEACH = 0xFFFCEADE.toInt()
+    private const val BRAND_LINE = 0xFFD7CCC8.toInt()
+    private const val BRAND_BG = 0xFFFFFFFF.toInt()
 
     private val weekDays = listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo")
     private val mealTimes = listOf("Almuerzo", "Comida", "Cena")
 
-    fun crearReportePlaneadorSemanal(
+    suspend fun crearReportePlaneadorSemanal(
         context: Context,
         nombreArchivo: String,
         slots: List<MealPlanSlot>
-    ) {
-        val pdfDocument = PdfDocument()
-        val sortedSlots = slots.sortedWith(compareBy({ weekDays.indexOf(it.dia) }, { mealTimes.indexOf(it.tiempo) }))
-        val generatedDate = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
-        var pageNumber = 1
-        var page = newPage(pdfDocument, pageNumber)
-        var canvas = page.canvas
-        var y = drawPlannerHeader(canvas, generatedDate)
+    ) = withContext(Dispatchers.IO) {
+        // Pre-load images
+        val imageMap = mutableMapOf<String, Bitmap>()
+        val imageLoader = context.imageLoader
 
-        drawSummary(canvas, sortedSlots)
-        y += 86f
-
-        weekDays.forEach { day ->
-            val requiredHeight = 42f + (mealTimes.size * 58f)
-            if (y + requiredHeight > PAGE_HEIGHT - 50f) {
-                drawFooter(canvas, pageNumber)
-                pdfDocument.finishPage(page)
-                pageNumber += 1
-                page = newPage(pdfDocument, pageNumber)
-                canvas = page.canvas
-                y = drawContinuedHeader(canvas, generatedDate)
+        slots.forEach { slot ->
+            if (slot.imagen.isNotBlank() && !imageMap.containsKey(slot.imagen)) {
+                try {
+                    val request = ImageRequest.Builder(context)
+                        .data(slot.imagen)
+                        .allowHardware(false) // Required for PDF drawing
+                        .build()
+                    val result = imageLoader.execute(request)
+                    if (result is SuccessResult) {
+                        val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
+                        if (bitmap != null) {
+                            imageMap[slot.imagen] = bitmap
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
-
-            y = drawDaySection(canvas, y, day, sortedSlots)
-            y += 12f
         }
 
-        drawFooter(canvas, pageNumber)
+        val pdfDocument = PdfDocument()
+        val page = newPage(pdfDocument, 1)
+        val canvas = page.canvas
+
+        // Background
+        canvas.drawColor(BRAND_BG)
+
+        drawBohoHeader(canvas, context)
+
+        val cardWidth = 168f
+        val cardHeight = 215f
+        val spacing = 10f
+        val startY = 110f
+
+        // Grid layout for 7 days
+        weekDays.forEachIndexed { index, day ->
+            val col = index % 3
+            val row = index / 3
+            val x = MARGIN + (col * (cardWidth + spacing))
+            val y = startY + (row * (cardHeight + spacing))
+
+            drawDayCard(canvas, x, y, cardWidth, cardHeight, day, slots.filter { it.dia == day }, imageMap)
+        }
+
+        // Draw Watermark Logo in the corner with cropped effect
+        drawWatermarkLogo(canvas, context)
+
         pdfDocument.finishPage(page)
-        guardarPdfEnDescargas(context, nombreArchivo, pdfDocument)
+        withContext(Dispatchers.Main) {
+            guardarPdfEnDescargas(context, nombreArchivo, pdfDocument)
+        }
     }
 
     fun crearYGuardarPdfEnDescargas(
@@ -156,152 +189,159 @@ object PdfUtils {
         return pdfDocument.startPage(pageInfo)
     }
 
-    private fun drawPlannerHeader(canvas: Canvas, generatedDate: String): Float {
-        canvas.drawRect(
-            0f,
-            0f,
-            PAGE_WIDTH.toFloat(),
-            132f,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply { color = BRAND_GREEN }
-        )
+    private fun drawBohoHeader(canvas: Canvas, context: Context) {
+        // Draw Logo
+        try {
+            val logoBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.logo)
+            if (logoBitmap != null) {
+                val imgSize = 60f
+                val scaledLogo = Bitmap.createScaledBitmap(logoBitmap, imgSize.toInt(), imgSize.toInt(), true)
+                
+                canvas.save()
+                val path = Path().apply {
+                    addCircle(MARGIN + (imgSize / 2), 20f + (imgSize / 2), imgSize / 2, Path.Direction.CW)
+                }
+                canvas.clipPath(path)
+                canvas.drawBitmap(scaledLogo, MARGIN, 20f, null)
+                canvas.restore()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-        canvas.drawRoundRect(
-            RectF(MARGIN, 28f, 126f, 70f),
-            20f,
-            20f,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply { color = BRAND_LEAF }
-        )
-        canvas.drawText(
-            "Recetario",
-            MARGIN + 15f,
-            55f,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
-                textSize = 13f
-                isFakeBoldText = true
-            }
-        )
-        canvas.drawText(
-            "Plan semanal de comidas",
-            MARGIN,
-            100f,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
-                textSize = 28f
-                isFakeBoldText = true
-            }
-        )
-        canvas.drawText(
-            "Reporte generado: $generatedDate",
-            MARGIN,
-            120f,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = BRAND_CREAM
-                textSize = 12f
-            }
-        )
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = BRAND_BROWN
+            textSize = 36f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC)
+        }
+        canvas.drawText("Planificador Semanal", MARGIN + 80f, 65f, paint)
 
-        return 170f
+        // Wavy decorative line
+        val wavyPath = Path().apply {
+            moveTo(MARGIN + 100f, 75f)
+            cubicTo(MARGIN + 180f, 60f, MARGIN + 320f, 90f, MARGIN + 420f, 75f)
+        }
+        val wavyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = BRAND_LINE
+            strokeWidth = 1.5f
+            style = Paint.Style.STROKE
+        }
+        canvas.drawPath(wavyPath, wavyPaint)
+
+        // Simple decorative lines
+        val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = BRAND_LINE
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+        canvas.drawLine(MARGIN, 92f, PAGE_WIDTH - MARGIN, 92f, linePaint)
     }
 
-    private fun drawContinuedHeader(canvas: Canvas, generatedDate: String): Float {
-        canvas.drawText(
-            "Plan semanal de comidas",
-            MARGIN,
-            42f,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = BRAND_GREEN
-                textSize = 18f
-                isFakeBoldText = true
+    private fun drawWatermarkLogo(
+        canvas: Canvas,
+        context: Context
+    ) {
+        try {
+            val logoBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.logo)
+            if (logoBitmap != null) {
+                // Larger size for the cropped corner effect
+                val imgSize = 350f
+                val scaledLogo = Bitmap.createScaledBitmap(logoBitmap, imgSize.toInt(), imgSize.toInt(), true)
+                
+                // Positioned so it shows more of the logo in the bottom-right corner
+                val x = PAGE_WIDTH - 250f
+                val y = PAGE_HEIGHT - 250f
+                val centerX = x + (imgSize / 2)
+                val centerY = y + (imgSize / 2)
+                
+                canvas.save()
+                
+                // Apply rotation
+                canvas.rotate(15f, centerX, centerY)
+                
+                // Circular clip to remove background (only keep the middle)
+                val path = Path().apply {
+                    addCircle(centerX, centerY, imgSize / 2.2f, Path.Direction.CW)
+                }
+                canvas.clipPath(path)
+                
+                // Draw as a watermark (with transparency)
+                val paint = Paint().apply {
+                    alpha = 35 // Subtle transparency
+                }
+                canvas.drawBitmap(scaledLogo, x, y, paint)
+                
+                canvas.restore()
             }
-        )
-        canvas.drawText(
-            "Continuacion - $generatedDate",
-            MARGIN,
-            60f,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = BRAND_MUTED
-                textSize = 10f
-            }
-        )
-        drawDivider(canvas, 76f)
-        return 98f
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    private fun drawSummary(canvas: Canvas, slots: List<MealPlanSlot>) {
-        val assigned = slots.count { it.idMeal.isNotBlank() }
-        val total = weekDays.size * mealTimes.size
-        val daysWithMeals = slots.map { it.dia }.distinct().size
-        val cards = listOf(
-            "Platillos asignados" to "$assigned/$total",
-            "Dias con plan" to "$daysWithMeals/${weekDays.size}",
-            "Pendientes" to "${total - assigned}"
-        )
+    private fun drawDayCard(
+        canvas: Canvas,
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        day: String,
+        daySlots: List<MealPlanSlot>,
+        imageMap: Map<String, Bitmap>
+    ) {
+        val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = BRAND_PEACH }
+        canvas.drawRoundRect(RectF(x, y, x + width, y + height), 8f, 8f, cardPaint)
+
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = BRAND_BROWN
+            textSize = 14f
+            isFakeBoldText = true
+        }
+        canvas.drawText(day.uppercase(), x + 12f, y + 25f, textPaint)
+        canvas.drawLine(x + 12f, y + 32f, x + width - 12f, y + 32f, Paint().apply { color = BRAND_BROWN; strokeWidth = 1f })
+
+        var currentY = y + 55f
         val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = BRAND_MUTED
+            color = BRAND_BROWN
             textSize = 10f
         }
-        val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = BRAND_INK
-            textSize = 20f
-            isFakeBoldText = true
+        val dishPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = BRAND_BROWN
+            textSize = 9f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
         }
-        val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = BRAND_CREAM }
 
-        var x = MARGIN
-        cards.forEach { (label, value) ->
-            canvas.drawRoundRect(RectF(x, 150f, x + 160f, 218f), 14f, 14f, cardPaint)
-            canvas.drawText(label, x + 14f, 176f, labelPaint)
-            canvas.drawText(value, x + 14f, 203f, valuePaint)
-            x += 174f
+        mealTimes.forEach { time ->
+            val label = if (time == "Almuerzo") "Desayuno:" else "$time:"
+            canvas.drawText(label, x + 12f, currentY, labelPaint)
+            
+            val slot = daySlots.find { it.tiempo == time }
+            if (slot != null && slot.nombre.isNotBlank()) {
+                val imageBitmap = imageMap[slot.imagen]
+                val textXOffset = if (imageBitmap != null) {
+                    val imgSize = 32f
+                    val scaledImg = Bitmap.createScaledBitmap(imageBitmap, imgSize.toInt(), imgSize.toInt(), true)
+                    canvas.drawBitmap(scaledImg, x + 12f, currentY + 5f, null)
+                    imgSize + 8f
+                } else {
+                    0f
+                }
+                
+                drawWrappedText(canvas, slot.nombre, x + 12f + textXOffset, currentY + 14f, width - 24f - textXOffset, dishPaint, 10f, 1)
+            }
+            
+            drawDashedLine(canvas, x + 12f, currentY + 20f, x + width - 12f, currentY + 20f)
+            currentY += 45f
         }
     }
 
-    private fun drawDaySection(
-        canvas: Canvas,
-        startY: Float,
-        day: String,
-        slots: List<MealPlanSlot>
-    ): Float {
-        val sectionWidth = PAGE_WIDTH - (MARGIN * 2)
-        val sectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = BRAND_GREEN }
-        val rowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = LIGHT_ROW }
-        val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE
-            textSize = 15f
-            isFakeBoldText = true
+    private fun drawDashedLine(canvas: Canvas, x1: Float, y1: Float, x2: Float, y2: Float) {
+        val paint = Paint().apply {
+            color = BRAND_LINE
+            strokeWidth = 1f
+            style = Paint.Style.STROKE
+            pathEffect = android.graphics.DashPathEffect(floatArrayOf(2f, 2f), 0f)
         }
-        val mealTimePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = BRAND_GREEN
-            textSize = 11f
-            isFakeBoldText = true
-        }
-        val dishPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = BRAND_INK
-            textSize = 11f
-            isFakeBoldText = true
-        }
-        val commentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = BRAND_MUTED
-            textSize = 9f
-        }
-
-        canvas.drawRoundRect(RectF(MARGIN, startY, MARGIN + sectionWidth, startY + 32f), 12f, 12f, sectionPaint)
-        canvas.drawText(day, MARGIN + 14f, startY + 22f, titlePaint)
-
-        var y = startY + 42f
-        mealTimes.forEach { mealTime ->
-            val slot = slots.firstOrNull { it.dia == day && it.tiempo == mealTime }
-            val dish = slot?.nombre?.ifBlank { "Sin asignar" } ?: "Sin asignar"
-            val comments = slot?.comentarios.orEmpty().ifBlank { "Sin comentarios" }
-
-            canvas.drawRoundRect(RectF(MARGIN, y, MARGIN + sectionWidth, y + 48f), 10f, 10f, rowPaint)
-            canvas.drawText(mealTime, MARGIN + 12f, y + 20f, mealTimePaint)
-            drawWrappedText(canvas, dish, MARGIN + 108f, y + 19f, 290f, dishPaint, 13f, 2)
-            drawWrappedText(canvas, "Comentarios: $comments", MARGIN + 108f, y + 35f, 365f, commentPaint, 11f, 1)
-            y += 58f
-        }
-        return y
+        canvas.drawLine(x1, y1, x2, y2, paint)
     }
 
     private fun drawWrappedText(
@@ -335,23 +375,5 @@ object PdfUtils {
         if (line.isNotBlank() && drawnLines < maxLines) {
             canvas.drawText(line, x, currentY, paint)
         }
-    }
-
-    private fun drawDivider(canvas: Canvas, y: Float) {
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFEADCCC.toInt()
-            strokeWidth = 1.5f
-        }
-        canvas.drawLine(MARGIN, y, PAGE_WIDTH - MARGIN, y, paint)
-    }
-
-    private fun drawFooter(canvas: Canvas, pageNumber: Int) {
-        drawDivider(canvas, PAGE_HEIGHT - 38f)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = BRAND_MUTED
-            textSize = 9f
-        }
-        canvas.drawText("Recetario - Planeador semanal", MARGIN, PAGE_HEIGHT - 20f, paint)
-        canvas.drawText("Pagina $pageNumber", PAGE_WIDTH - MARGIN - 44f, PAGE_HEIGHT - 20f, paint)
     }
 }
